@@ -260,6 +260,12 @@ try {
   }
   ok("14. All 37 state views load", bad.length === 0, bad.join(","));
 
+  // 14b. Rapid switching must not show a stale state's data
+  await page.select("#state", "LAGOS"); await page.select("#state", "KOGI"); await page.select("#state", "ABIA");
+  await page.waitForFunction(() => window.__gur.getView() === "ABIA", { timeout: 60000 }); await sleep(1500);
+  const race = await page.evaluate(() => ({ v: window.__gur.getView(), states: [...new Set(window.__gur.getUnits().map((u) => u.state))] }));
+  ok("14b. Rapid state switching ends on the last choice with its own data", race.v === "ABIA" && race.states.join() === "ABIA", JSON.stringify(race));
+
   // 15. Deep links
   await page.goto("about:blank");
   await page.goto(BASE + "/index.html#KANO~" + firstUid, { waitUntil: "domcontentloaded" });

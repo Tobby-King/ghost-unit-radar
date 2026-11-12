@@ -77,19 +77,26 @@
   }
   function titleCase(s) { return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()); }
 
+  let loadedView = null;
   async function loadView(v) {
     view = v;
     $("card").hidden = true;
+    $("stateHint").textContent = "Loading…";
+    let data, hint;
     if (v === NATIONAL) {
-      units = fromNational(await getJSON("data/national_location_flags.json"));
-      $("stateHint").textContent = `${fmt(units.length)} units whose official coordinate is outside Nigeria or in the wrong state. Zoom out to see where they land.`;
+      data = fromNational(await getJSON("data/national_location_flags.json"));
+      hint = `${fmt(data.length)} units whose official coordinate is outside Nigeria or in the wrong state. Zoom out to see where they land.`;
     } else {
       const entry = summary.index.find((s) => s.state === v);
-      units = fromState(await getJSON("data/" + entry.file));
-      $("stateHint").textContent = entry.with_coordinates === 0
+      data = fromState(await getJSON("data/" + entry.file));
+      hint = entry.with_coordinates === 0
         ? "INEC published no coordinates for this state, so only the list is available (no map, no plausibility check)."
         : `${fmt(entry.with_coordinates)} of ${fmt(entry.units)} units have coordinates. Registers and result sheets are SYNTHETIC.`;
     }
+    if (view !== v) return; // user switched again while this was downloading: drop stale data
+    units = data;
+    $("stateHint").textContent = hint;
+    loadedView = v;
     draw(true);
   }
 
@@ -234,7 +241,7 @@
   });
 
   // Read-only hook for automated end-to-end tests (no effect on the app).
-  window.__gur = { map, markers, getUnits: () => units, getView: () => view };
+  window.__gur = { map, markers, getUnits: () => units, getView: () => (loadedView === view ? view : null) };
 
   // Deep links: #N~PU000002 (national view) or #KANO~PU154001 (state view).
   async function handleHash() {
