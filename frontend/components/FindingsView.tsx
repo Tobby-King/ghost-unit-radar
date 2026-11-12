@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { BAND_FROM_NAME, LABEL, fmt, getJSON, titleCase, type Findings, type StateFinding, type Summary } from "@/lib/data";
-import { CountUp, SourceTag, StatusPill, TopBar } from "./ui";
+import { CountUp, Icon, StatusPill, TopBar } from "./ui";
 
 const MEASURES: { key: keyof StateFinding; label: string; note: string }[] = [
-  { key: "outside", label: "Outside Nigeria", note: "Published coordinate falls outside the country" },
-  { key: "wrong_state", label: "In a different state", note: "Coordinate falls in another state (3 km border tolerance)" },
-  { key: "stacked", label: "Stacked on one point", note: "10 or more units share one exact coordinate" },
-  { key: "no_coordinate", label: "No location published", note: "INEC list carries no coordinate" },
+  { key: "outside", label: "Abroad", note: "Published coordinate falls outside the country" },
+  { key: "wrong_state", label: "Wrong state", note: "Coordinate falls in another state (3 km border tolerance)" },
+  { key: "stacked", label: "Stacked", note: "10 or more units share one exact coordinate" },
+  { key: "no_coordinate", label: "No location", note: "INEC list carries no coordinate" },
 ];
 type SortKey = "score" | "name" | "state";
 
@@ -38,13 +38,13 @@ export default function FindingsView() {
   }, [data, sort]);
   const n = summary?.national;
 
-  const head: { label: string; value: number | undefined; tone?: string; note?: string }[] = n ? [
-    { label: "Polling units", value: n.units, note: "INEC list, 2022" },
-    { label: "With a published location", value: n.with_coordinates, note: `${((n.with_coordinates / n.units) * 100).toFixed(0)}% of all units` },
-    { label: "Outside Nigeria", value: n.outside_nigeria, tone: "text-field", note: `top: ${n.top_foreign_places[0]?.[0]}` },
-    { label: "In a different state", value: n.wrong_state, tone: "text-review" },
-    { label: "Stacked on one point", value: n.stacked_units, tone: "text-review", note: `largest stack ${fmt(n.largest_stack.size)} units` },
-    { label: "Need field check", value: n.red, tone: "text-field", note: `◆ plus ${fmt(n.amber)} ▲ review` },
+  const head: { label: string; value: number | undefined; tone?: string }[] = n ? [
+    { label: "Polling units", value: n.units },
+    { label: "With a location", value: n.with_coordinates },
+    { label: "Outside Nigeria", value: n.outside_nigeria, tone: "text-field" },
+    { label: "Wrong state", value: n.wrong_state, tone: "text-review" },
+    { label: "Stacked", value: n.stacked_units, tone: "text-review" },
+    { label: "Field checks", value: n.red, tone: "text-field" },
   ] : [];
 
   const SortBtn = ({ k, children }: { k: SortKey; children: React.ReactNode }) => (
@@ -57,114 +57,105 @@ export default function FindingsView() {
   return (
     <div className="min-h-dvh">
       <TopBar active="/findings/" />
-      <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-12">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[13px] text-muted">Report · data as published by INEC, 2022</p>
-            <h1 className="text-3xl md:text-4xl">Findings</h1>
-            <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted">
-              Location findings use the real public INEC polling-unit list (2022). Register and result-sheet numbers are synthetic.
-              Every flag is a lead for field verification, not a finding of wrongdoing.
-            </p>
-          </div>
-          <a href="/data/field_verification.csv" download="ghost-unit-radar_field-verification.csv" className="btn-primary">
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12" /></svg>
-            Download field-verification list (CSV)
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-12 md:px-8 md:pt-20">
+        <header className="rise text-center">
+          <p className="eyebrow">INEC polling-unit list · 2022</p>
+          <h1 className="mx-auto mt-3 max-w-3xl text-[44px] leading-[1.05] md:text-[64px]">Findings.</h1>
+          <p className="mx-auto mt-4 max-w-xl text-[19px] leading-snug text-muted md:text-[21px]">
+            Where the published locations don’t add up.
+          </p>
+          <a href="/data/field_verification.csv" download="ghost-unit-radar_field-verification.csv" className="btn-primary press mt-7">
+            <Icon name="download" className="h-[18px] w-[18px]" strokeWidth={2} />
+            Field-verification list
           </a>
         </header>
 
-        {error && <p className="mt-6 text-field">Could not load data: {error}</p>}
+        {error && <p className="mt-6 text-center text-field">Could not load data: {error}</p>}
 
-        <section aria-label="Headline numbers" className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-[6px] border border-line bg-line md:grid-cols-3 lg:grid-cols-6">
+        <section aria-label="Headline numbers" className="mt-14 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {(head.length ? head : Array.from({ length: 6 }, (): (typeof head)[number] => ({ label: "…", value: undefined }))).map((h, k) => (
-            <div key={k} className="bg-surface p-4">
-              <p className="text-[13px] text-muted">{h.label}</p>
-              <p className="mt-1 font-display text-[28px] leading-none tabular-nums">{h.value == null ? "–" : <CountUp value={h.value} delay={k * 90} />}</p>
-              {h.note && <p className="mt-1.5 truncate text-xs text-muted">{h.note}</p>}
+            <div key={k} className="panel rise p-5" style={{ animationDelay: `${120 + k * 60}ms` }}>
+              <p className={`text-[30px] font-bold leading-none tracking-tight tabular-nums ${h.tone ?? ""}`}>{h.value == null ? "–" : <CountUp value={h.value} delay={k * 90} />}</p>
+              <p className="mt-2 text-[13px] font-medium text-muted">{h.label}</p>
             </div>
           ))}
         </section>
 
-        <section className="mt-12" aria-labelledby="by-state">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 id="by-state" className="text-xl">Location problems by state</h2>
-              <p className="mt-1 text-sm text-muted">{MEASURES.find((m) => m.key === measure)?.note}. Real data.</p>
-            </div>
-            <div role="radiogroup" aria-label="Measure" className="flex flex-wrap gap-1 rounded-[6px] border border-line bg-surface p-1">
+        <section className="mt-20" aria-labelledby="by-state">
+          <div className="flex flex-col items-center gap-5 text-center">
+            <h2 id="by-state" className="text-[32px] md:text-[40px]">By state.</h2>
+            <div role="radiogroup" aria-label="Measure" className="inline-flex flex-wrap justify-center gap-0.5 rounded-full bg-line/50 p-1">
               {MEASURES.map((m) => (
-                <button key={m.key} type="button" role="radio" aria-checked={measure === m.key} onClick={() => setMeasure(m.key)}
-                  className={`rounded-chip px-2.5 py-1.5 text-xs ${measure === m.key ? "bg-ink text-bg" : "text-muted hover:text-ink"}`}>
+                <button key={m.key} type="button" role="radio" aria-checked={measure === m.key} onClick={() => setMeasure(m.key)} title={m.note}
+                  className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all ${measure === m.key ? "bg-surface text-ink shadow-[0_2px_8px_rgb(0_0_0/.12)]" : "text-muted hover:text-ink"}`}>
                   {m.label}
                 </button>
               ))}
             </div>
           </div>
-          <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_260px]">
-            <ol key={measure} className="panel space-y-[3px] p-4" onMouseLeave={() => setHover(null)}>
+          <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_280px]">
+            <ol key={measure} className="panel space-y-[3px] p-5" onMouseLeave={() => setHover(null)}>
               {bars.map((b) => {
                 const v = b[measure] as number;
                 return (
                   <li key={b.state}>
-                    <button type="button" className={`grid w-full grid-cols-[140px_1fr_64px] items-center gap-3 rounded-[4px] px-1 py-[3px] text-left text-xs ${hover === b.state ? "bg-raised" : ""}`}
+                    <button type="button" className={`grid w-full grid-cols-[130px_1fr_60px] items-center gap-3 rounded-[8px] px-2 py-[3px] text-left text-[13px] ${hover === b.state ? "bg-raised" : ""}`}
                       onMouseEnter={() => setHover(b.state)} onFocus={() => setHover(b.state)}
                       aria-label={`${titleCase(b.state)}: ${fmt(v)}`}>
                       <span className="truncate text-muted">{titleCase(b.state)}</span>
-                      <span className="flex h-3 items-center">
-                        <span className={`grow-x h-3 rounded-r-[4px] transition-colors ${hover === b.state ? "bg-ink" : "bg-ink/55"}`} style={{ width: v ? `${Math.max(0.6, (v / max) * 100)}%` : 0, animationDelay: `${Math.min(bars.indexOf(b), 20) * 25}ms` }} />
+                      <span className="flex h-2.5 items-center">
+                        <span className={`grow-x h-2.5 rounded-full transition-colors ${hover === b.state ? "bg-field" : "bg-ink/70"}`} style={{ width: v ? `${Math.max(0.8, (v / max) * 100)}%` : 0, animationDelay: `${Math.min(bars.indexOf(b), 20) * 25}ms` }} />
                       </span>
-                      <span className="text-right tabular-nums text-ink">{fmt(v)}</span>
+                      <span className="text-right font-semibold tabular-nums">{fmt(v)}</span>
                     </button>
                   </li>
                 );
               })}
             </ol>
             {focus && (
-              <aside className="panel h-fit p-4 lg:sticky lg:top-6" aria-live="polite">
-                
-                <p className="font-display text-lg">{titleCase(focus.state)}</p>
-                <dl className="mt-3 space-y-1.5 text-sm">
-                  <Row k="Polling units" v={focus.units} />
+              <aside className="panel h-fit p-5 lg:sticky lg:top-20" aria-live="polite">
+                <p className="text-[22px] font-bold tracking-tight">{titleCase(focus.state)}</p>
+                <p className="text-[13px] text-muted">{fmt(focus.units)} polling units</p>
+                <dl className="mt-4 space-y-2 text-[14px]">
                   <Row k="With location" v={focus.with_coordinates} />
                   {MEASURES.map((m) => <Row key={m.key} k={m.label} v={focus[m.key] as number} strong={m.key === measure} />)}
-                  <Row k="◆ Field check needed" v={focus.red} />
-                  <Row k="▲ Review" v={focus.amber} />
+                  <Row k="Field checks" v={focus.red} />
+                  <Row k="Review" v={focus.amber} />
                 </dl>
               </aside>
             )}
           </div>
         </section>
 
-        <section className="mt-12" aria-labelledby="least">
-          <h2 id="least" className="text-xl">The 20 least plausible units</h2>
-          <p className="mt-1 text-sm text-muted">Ranked by plausibility score (lowest first). Click a unit to open it on the map.</p>
-          <div className="panel mt-5 overflow-x-auto">
-            <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-line text-left text-[13px] text-muted">
+        <section className="mt-20" aria-labelledby="least">
+          <h2 id="least" className="text-center text-[32px] md:text-[40px]">Least plausible.</h2>
+          <p className="mt-2 text-center text-[17px] text-muted">The 20 lowest scores. Tap one to see it on the map.</p>
+          <div className="panel mt-8 overflow-x-auto">
+            <table className="w-full min-w-[720px] text-[14px]">
+              <thead className="text-left text-[12px] font-semibold uppercase tracking-[0.05em] text-muted">
                 <tr>
-                  <th scope="col" className="px-4 py-3 font-medium" aria-sort={ariaSort("score")}><SortBtn k="score">#</SortBtn></th>
-                  <th scope="col" className="px-4 py-3 font-medium" aria-sort={ariaSort("name")}><SortBtn k="name">Polling unit</SortBtn></th>
-                  <th scope="col" className="px-4 py-3 font-medium" aria-sort={ariaSort("state")}><SortBtn k="state">State · LGA</SortBtn></th>
-                  <th scope="col" className="px-4 py-3 font-medium">Score</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Status</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Why</th>
+                  <th scope="col" className="px-5 py-4" aria-sort={ariaSort("score")}><SortBtn k="score">#</SortBtn></th>
+                  <th scope="col" className="px-5 py-4" aria-sort={ariaSort("name")}><SortBtn k="name">Unit</SortBtn></th>
+                  <th scope="col" className="px-5 py-4" aria-sort={ariaSort("state")}><SortBtn k="state">State</SortBtn></th>
+                  <th scope="col" className="px-5 py-4">Score</th>
+                  <th scope="col" className="px-5 py-4">Why</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((u) => (
-                  <tr key={u.uid} className="border-b border-line align-top last:border-0 hover:bg-raised/50">
-                    <td className="px-4 py-3 tabular-nums text-muted">{u.rank}</td>
-                    <td className="px-4 py-3">
-                      <Link href={`/#${u.uid}`} className="font-medium hover:underline underline-offset-2 hover:text-muted">{titleCase(u.name)}</Link>
-                      <div className="font-mono text-xs text-muted">{u.uid}</div>
+                  <tr key={u.uid} className="border-t border-line/70 align-top hover:bg-raised/60">
+                    <td className="px-5 py-3.5 tabular-nums text-muted">{u.rank}</td>
+                    <td className="px-5 py-3.5">
+                      <Link href={`/#${u.uid}`} className="font-semibold hover:text-accent-ink">{titleCase(u.name)}</Link>
+                      <div className="mt-0.5"><StatusPill band={BAND_FROM_NAME[u.band] ?? 3} /></div>
                     </td>
-                    <td className="px-4 py-3">{titleCase(u.state)}<div className="text-xs text-muted">{titleCase(u.lga)}</div></td>
-                    <td className="px-4 py-3 tabular-nums">{u.score}</td>
-                    <td className="px-4 py-3"><StatusPill band={BAND_FROM_NAME[u.band] ?? 3} /></td>
-                    <td className="px-4 py-3">
-                      <ul className="space-y-1">
+                    <td className="px-5 py-3.5">{titleCase(u.state)}<div className="text-[12px] text-muted">{titleCase(u.lga)}</div></td>
+                    <td className="px-5 py-3.5 text-[17px] font-bold tabular-nums">{u.score}</td>
+                    <td className="px-5 py-3.5">
+                      <ul className="flex flex-wrap gap-1.5">
                         {u.reasons.map(([code, src]) => (
-                          <li key={code} className="flex items-center gap-2 text-xs"><SourceTag source={src} /> {LABEL[code] ?? code}</li>
+                          <li key={code} className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${src.toUpperCase().startsWith("SYN") ? "bg-review/[.12] text-review" : "bg-raised"}`}
+                            title={src.toUpperCase().startsWith("SYN") ? "Synthetic data" : "Real public data"}>{LABEL[code] ?? code}</li>
                         ))}
                       </ul>
                     </td>
@@ -173,11 +164,12 @@ export default function FindingsView() {
               </tbody>
             </table>
           </div>
+          <p className="mt-3 text-center text-[12px] text-muted"><span className="rounded-full bg-review/[.12] px-2 py-0.5 font-semibold text-review">Orange</span> tags use synthetic data. Grey tags use real public data.</p>
         </section>
 
-        <footer className="mt-12 border-t border-line pt-6 text-xs leading-relaxed text-muted">
-          A flag means a unit needs field verification. It is not evidence of wrongdoing. No INEC system was accessed: only static public files were used.
-          See <Link href="/methods/" className="underline underline-offset-2 hover:text-muted">Methods &amp; Ethics</Link>.
+        <footer className="mt-20 text-center text-[12px] leading-relaxed text-muted">
+          A flag means “check in the field”, not wrongdoing. No INEC system was accessed. ·{" "}
+          <Link href="/methods/" className="text-accent-ink hover:underline">Methods &amp; ethics</Link>
         </footer>
       </main>
     </div>

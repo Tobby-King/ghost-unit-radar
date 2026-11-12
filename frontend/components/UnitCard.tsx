@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import {
-  STATUS, clockFlag, clockSentence, fmt, maxAccredited, plainReason, stateName, titleCase, unitDetailsText,
+  LABEL, STATUS, clockFlag, clockSentence, fmt, maxAccredited, plainReason, stateName, titleCase, unitDetailsText,
   type Summary, type UnitDetail,
 } from "@/lib/data";
-import { SourceTag, StatusPill } from "./ui";
+import { Icon, ScoreRing, SourceTag, StatusPill } from "./ui";
 
 interface Props {
   unit: UnitDetail | null;
@@ -19,22 +19,27 @@ interface Props {
   onClose: () => void;
 }
 
+const REASON_ICON: Record<string, string> = {
+  OUTSIDE_NIGERIA: "globe", WRONG_STATE: "pinX", STACKED: "stack", NO_COORDINATE: "info",
+  REGISTER_ABOVE_ADULTS: "people", EMPTY_CATCHMENT: "people", FEW_ROOFTOPS: "info", NEW_BUILDINGS: "info",
+};
+
 export default function UnitCard({ unit: u, loading, summary, centroids, spv, inList, listSize, onToggleList, onClose }: Props) {
   const [copied, setCopied] = useState(false);
   if (!u) {
     return (
-      <div className="p-5 text-sm text-muted" aria-busy={loading}>
-        {loading ? "Loading unit…" : "Unit not found."}
+      <div className="flex items-center gap-3 p-6 text-[15px] text-muted" aria-busy={loading}>
+        {loading ? <><span className="loading-bar h-1 w-16 rounded-full bg-line" />Loading</> : "Unit not found."}
       </div>
     );
   }
   const hours = summary.params.polling_hours;
   const fastest = summary.params.seconds_per_voter_fastest;
-  const radius = summary.params.radius_km;
   const reasons = u.reasons.filter((r) => !r.code.startsWith("CLOCK"));
   const clock = u.accredited != null && u.devices ? clockSentence(u.accredited, u.devices, hours, spv, fastest) : null;
   const clockHit = clockFlag(u.accredited, u.devices, hours, spv);
   const ratio = u.register != null && u.adults_share ? u.register / u.adults_share : null;
+  const cap = u.devices ? maxAccredited(hours, spv, u.devices) : 0;
 
   const copy = async () => {
     try {
@@ -45,103 +50,125 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
   };
 
   return (
-    <article className="flex min-h-full flex-col text-[14px]" aria-labelledby="unit-name">
-      <header className="rise px-5 pb-5 pt-4">
-        <div className="flex items-center justify-between gap-3 text-[13px] text-muted">
-          <span>Polling unit <span className="font-mono">{u.uid}</span></span>
-          <button type="button" onClick={onClose} className="-mr-2 grid h-9 w-9 place-items-center rounded-full bg-raised text-ink hover:bg-line" aria-label="Close unit card">
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="m5 5 10 10M15 5 5 15" /></svg>
+    <article className="flex min-h-full flex-col" aria-labelledby="unit-name">
+      <header className="rise px-6 pb-5 pt-5">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-mono text-[12px] text-muted">{u.uid}</span>
+          <button type="button" onClick={onClose} className="-mr-2 grid h-8 w-8 place-items-center rounded-full bg-raised text-muted hover:text-ink" aria-label="Close unit card">
+            <Icon name="close" className="h-4 w-4" strokeWidth={2.2} />
           </button>
         </div>
-        <h2 id="unit-name" className="mt-3 text-[22px] leading-tight">{titleCase(u.name)}</h2>
-        <p className="mt-1.5 text-muted">
-          {titleCase(u.ward)} ward, {titleCase(u.lga)} LGA, {stateName(u.state)}
+        <h2 id="unit-name" className="mt-2 text-[26px] leading-[1.12]">{titleCase(u.name)}</h2>
+        <p className="mt-1.5 text-[15px] text-muted" title={`${titleCase(u.ward)} ward`}>
+          {titleCase(u.lga)} · {stateName(u.state)}
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="stamp inline-block"><StatusPill band={u.band} size="lg" /></span>
-          <span className="text-[13px] text-muted">Plausibility score {u.score} of 100</span>
+        <div className="mt-5 flex items-center gap-4">
+          <ScoreRing score={u.score} band={u.band} />
+          <div className="min-w-0">
+            <span className="pop inline-block"><StatusPill band={u.band} size="lg" /></span>
+            <p className="mt-1.5 text-[13px] text-muted">Plausibility out of 100</p>
+          </div>
         </div>
       </header>
 
-      <section className="rise border-t border-line px-5 py-5" style={{ animationDelay: "120ms" }} aria-labelledby="why">
-        <h3 id="why" className="font-sans text-[15px] font-semibold">Why it was flagged</h3>
+      <section className="rise px-4 pb-2" style={{ animationDelay: "100ms" }} aria-labelledby="why">
+        <h3 id="why" className="eyebrow px-2 pb-2">Why</h3>
         {reasons.length === 0 && !clockHit ? (
-          <p className="mt-2 text-muted">
-            {u.band === 3 ? "INEC published no coordinate for this unit, so its location cannot be checked." : "Nothing unusual: the unit sits inside its listed state and is not stacked with others."}
+          <p className="rounded-[16px] bg-raised px-4 py-3.5 text-[15px] text-muted">
+            {u.band === 3 ? "No location was published for this unit." : "Nothing unusual found."}
           </p>
         ) : (
-          <ol className="mt-3 space-y-4">
+          <ul className="space-y-2">
             {reasons.map((r, k) => (
-              <li key={r.code} className="rise grid grid-cols-[18px_1fr] gap-x-2" style={{ animationDelay: `${220 + k * 120}ms` }}>
-                <span className="text-muted">{k + 1}.</span>
-                <div>
-                  <p className="leading-relaxed">{plainReason(r, u, centroids)}</p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                    Could be innocent: {r.innocent.charAt(0).toLowerCase() + r.innocent.slice(1)} <SourceTag source={r.source} />
-                  </p>
+              <li key={r.code} className="rise rounded-[16px] bg-raised px-4 py-3.5" style={{ animationDelay: `${180 + k * 100}ms` }}>
+                <div className="flex gap-3">
+                  <Icon name={REASON_ICON[r.code] ?? "info"} className={`mt-0.5 h-5 w-5 ${u.band === 2 ? "text-field" : "text-review"}`} />
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-semibold leading-snug">{LABEL[r.code] ?? r.code}</p>
+                    <p className="mt-0.5 text-[13px] leading-snug text-muted">{plainReason(r, u, centroids)}</p>
+                  </div>
                 </div>
+                <details className="group mt-2 pl-8">
+                  <summary className="flex cursor-pointer items-center gap-1 text-[13px] font-medium text-muted hover:text-ink">
+                    Possible innocent cause <Icon name="chevron" className="disclose h-3.5 w-3.5 transition-transform" strokeWidth={2} />
+                  </summary>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{r.innocent} <SourceTag source={r.source} /></p>
+                </details>
               </li>
             ))}
-          </ol>
-        )}
-        {u.lat != null && (
-          <p className="mt-4 text-[13px] text-muted">Published coordinate <span className="font-mono">{u.lat.toFixed(5)}, {u.lon!.toFixed(5)}</span></p>
+          </ul>
         )}
       </section>
 
-      {clock && (
-        <section className="rise border-t border-line px-5 py-5" style={{ animationDelay: "320ms" }} aria-labelledby="clock">
-          <h3 id="clock" className="font-sans text-[15px] font-semibold">Clock audit <SourceTag source="SYNTHETIC" /></h3>
-          <p className="mt-2 leading-relaxed">
-            {clock.text}
-            {clock.flagged ? (
-              <span className={`font-semibold ${clock.secs < fastest ? "text-field" : "text-review"}`}> — {clock.verdict}.</span>
-            ) : <span className="text-muted"> — {clock.verdict}.</span>}
-          </p>
-          <p className="mt-1.5 text-[13px] text-muted">
-            At {spv} seconds per voter, {u.devices} device{u.devices === 1 ? "" : "s"} can accredit at most {fmt(maxAccredited(hours, spv, u.devices!))} voters in {hours} hours.
-          </p>
+      {clock && u.accredited != null && (
+        <section className="rise px-4 pt-4" style={{ animationDelay: "260ms" }} aria-labelledby="clock">
+          <h3 id="clock" className="eyebrow flex items-center gap-2 px-2 pb-2">Clock audit <SourceTag source="SYNTHETIC" /></h3>
+          <div className="rounded-[16px] bg-raised px-4 py-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[28px] font-bold leading-none tracking-tight tabular-nums">
+                {clock.secs < 10 ? clock.secs.toFixed(1) : fmt(clock.secs)}<span className="ml-1 text-[15px] font-semibold text-muted">s / voter</span>
+              </p>
+              <span className={`text-[13px] font-semibold ${clock.flagged ? (clock.secs < fastest ? "text-field" : "text-review") : "text-ok"}`}>
+                {clock.flagged ? (clock.secs < fastest ? "Too fast" : "Fast") : "Normal"}
+              </span>
+            </div>
+            <Meter value={u.accredited} max={Math.max(cap, u.accredited)} limit={cap} hot={clockHit} />
+            <p className="mt-2 text-[13px] text-muted">
+              {fmt(u.accredited)} accredited · limit {fmt(cap)} at {spv} s · {u.devices} BVAS
+            </p>
+          </div>
         </section>
       )}
 
-      <section className="rise border-t border-line px-5 py-5" style={{ animationDelay: "420ms" }} aria-labelledby="numbers">
-        <h3 id="numbers" className="font-sans text-[15px] font-semibold">The figures</h3>
-        <table className="mt-2 w-full">
-          <tbody className="[&_td]:py-1.5 [&_tr]:border-b [&_tr]:border-dotted [&_tr]:border-line">
-            <Fig label="Registered voters" note="synthetic" value={fmt(u.register)} />
-            <Fig label="Accredited voters" note="synthetic" value={fmt(u.accredited)} />
-            <Fig label={`Adults living within ${radius} km`} note="WorldPop" value={u.adults_r == null ? "–" : `about ${fmt(u.adults_r)}`} />
-            <Fig label="Adults this unit plausibly serves" note={u.units_r ? `shared by ${fmt(u.units_r)} units` : ""} value={u.adults_share == null ? "–" : `about ${fmt(u.adults_share)}`} />
-            <Fig label="Register ÷ adults served" value={ratio == null ? "–" : `${ratio.toFixed(1)}×`} strong={ratio != null && ratio > 1.2} />
-            <Fig label="Buildings nearby" note="Open Buildings" value="not loaded yet" muted />
-          </tbody>
-        </table>
+      <section className="rise px-4 pt-4" style={{ animationDelay: "340ms" }} aria-labelledby="numbers">
+        <h3 id="numbers" className="eyebrow px-2 pb-2">Numbers</h3>
+        <div className="grid grid-cols-3 gap-2">
+          <Tile value={fmt(u.register)} label="Register" tag="Synthetic" />
+          <Tile value={u.adults_share == null ? "–" : `≈${fmt(u.adults_share)}`} label="Adults it serves" />
+          <Tile value={ratio == null ? "–" : `${ratio.toFixed(1)}×`} label="Ratio" hot={ratio != null && ratio > 1.2} />
+        </div>
         {u.lat != null && u.adults_r == null && (
-          <p className="mt-3 text-[13px] leading-relaxed text-muted">
-            No catchment estimate: the coordinate is abroad, in another state or a shared centre point, so it does not show where the unit really is.
-          </p>
+          <p className="px-2 pt-2 text-[12px] text-muted">No estimate: this coordinate isn’t where the unit really is.</p>
+        )}
+        {u.lat != null && (
+          <p className="px-2 pt-3 font-mono text-[12px] text-muted">{u.lat.toFixed(5)}, {u.lon!.toFixed(5)}</p>
         )}
       </section>
 
-      <div className="flex gap-2 border-t border-line px-5 py-4">
-        <button type="button" onClick={onToggleList} className={`press flex-1 !rounded-full ${inList ? "btn-ghost" : "btn-primary"}`} aria-pressed={inList}>
-          {inList ? `On your list (${listSize})` : "Add to field-verification list"}
+      <div className="flex gap-2 px-4 pb-3 pt-5">
+        <button type="button" onClick={onToggleList} className={`press flex-1 ${inList ? "btn-ghost" : "btn-primary"}`} aria-pressed={inList}>
+          <Icon name={inList ? "done" : "plus"} className="h-[18px] w-[18px]" strokeWidth={2.2} />
+          {inList ? `On your list · ${listSize}` : "Add to field list"}
         </button>
-        <button type="button" onClick={copy} className="btn-ghost press !rounded-full" aria-live="polite">{copied ? "Copied" : "Copy details"}</button>
+        <button type="button" onClick={copy} className="btn-ghost press !px-4" aria-live="polite" aria-label={copied ? "Copied" : "Copy details"}>
+          <Icon name={copied ? "done" : "copy"} className="h-[18px] w-[18px]" />
+        </button>
       </div>
-      <p className="mt-auto px-5 pb-5 text-[13px] leading-relaxed text-muted">
-        A flag means this unit needs field verification. It is not evidence of wrongdoing.
+      <p className="mt-auto px-6 pb-5 pt-2 text-[12px] text-muted">
+        A flag means “check in the field”, not wrongdoing.
         <span className="sr-only"> Status: {STATUS[u.band].label}.</span>
       </p>
     </article>
   );
 }
 
-function Fig({ label, note, value, strong, muted }: { label: string; note?: string; value: string; strong?: boolean; muted?: boolean }) {
+function Tile({ value, label, tag, hot }: { value: string; label: string; tag?: string; hot?: boolean }) {
   return (
-    <tr>
-      <td className="pr-3 text-muted">{label}{note ? <span className="text-[12px] italic"> ({note})</span> : null}</td>
-      <td className={`whitespace-nowrap text-right tabular-nums ${strong ? "font-semibold text-field" : muted ? "text-muted" : ""}`}>{value}</td>
-    </tr>
+    <div className="rounded-[16px] bg-raised px-3 py-3">
+      <p className={`truncate text-[19px] font-bold leading-tight tracking-tight tabular-nums ${hot ? "text-field" : ""}`}>{value}</p>
+      <p className="mt-1 text-[11.5px] leading-tight text-muted">{label}</p>
+      {tag && <p className="mt-1 text-[10.5px] font-semibold text-review">{tag}</p>}
+    </div>
+  );
+}
+
+function Meter({ value, max, limit, hot }: { value: number; max: number; limit: number; hot: boolean }) {
+  const pct = max ? (value / max) * 100 : 0;
+  const lim = max ? (limit / max) * 100 : 0;
+  return (
+    <div className="relative mt-3 h-2 rounded-full bg-line/70" aria-hidden="true">
+      <div className={`grow-x h-2 rounded-full ${hot ? "bg-field" : "bg-ok"}`} style={{ width: `${Math.max(2, pct)}%` }} />
+      <div className="absolute -top-1 h-4 w-[2px] rounded-full bg-ink/70" style={{ left: `calc(${Math.min(99.5, lim)}% - 1px)` }} />
+    </div>
   );
 }

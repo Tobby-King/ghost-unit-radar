@@ -11,10 +11,10 @@ const STYLE = {
   dark: "https://tiles.openfreemap.org/styles/dark",
   light: "https://tiles.openfreemap.org/styles/positron",
 };
-const HEX = { ok: "#4C9F8B", review: "#E0A43A", field: "#E2574C", none: "#7A869C", accent: "#3FB8C9" };
+const HEX = { ok: "#34C759", review: "#FF9F0A", field: "#FF3B30", none: "#8E8E93", accent: "#007AFF" };
 const SURF = {
-  dark: { bg: "#0F1114", water: "#15191E", raised: "#1E2227", text: "#E9E6DF" },
-  light: { bg: "#F4F3EF", water: "#C9DDEA", raised: "#FFFFFF", text: "#181816" },
+  dark: { bg: "#1C1C1E", water: "#0B1A2A", raised: "#2C2C2E", text: "#F5F5F7" },
+  light: { bg: "#F6F5F2", water: "#B8DAF5", raised: "#FFFFFF", text: "#1D1D1F" },
 };
 
 export type PointProps = { i: number; b: number };
@@ -120,9 +120,9 @@ export default function RadarMap(props: Props) {
       map.addSource("selected", { type: "geojson", data: selectedFC(live.current.selected) });
 
       map.addLayer({ id: "states-line", type: "line", source: "states",
-        paint: { "line-color": HEX.accent, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.4, 9, 1], "line-opacity": t === "dark" ? 0.38 : 0.55 } });
+        paint: { "line-color": t === "dark" ? "#8E8E93" : "#8E8E93", "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 9, 1.1], "line-opacity": t === "dark" ? 0.45 : 0.6 } });
       map.addLayer({ id: "border-line", type: "line", source: "border",
-        paint: { "line-color": HEX.accent, "line-width": ["interpolate", ["linear"], ["zoom"], 2, 0.8, 8, 1.8], "line-opacity": 0.9 } });
+        paint: { "line-color": t === "dark" ? "#D1D1D6" : "#48484A", "line-width": ["interpolate", ["linear"], ["zoom"], 2, 1, 8, 2.2], "line-opacity": 0.85 } });
       map.addLayer({ id: "links-line", type: "line", source: "links", layout: { "line-cap": "round" },
         paint: { "line-color": HEX.field, "line-width": 1.1, "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, 0.6, 3, 0.45, 4.5, 0.12, 5.5, 0.05], "line-dasharray": [0, 4, 3] } });
       map.addLayer({ id: "clusters", type: "circle", source: "units", filter: ["has", "point_count"],

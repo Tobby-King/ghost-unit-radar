@@ -28,7 +28,7 @@ export default function MethodsView() {
       <TopBar active="/methods/" />
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 md:px-8 lg:grid-cols-[200px_1fr]">
         <nav aria-label="On this page" className="hidden lg:block">
-          <ol className="sticky top-8 space-y-2 text-sm text-muted">
+          <ol className="sticky top-20 space-y-2.5 text-[13px] font-medium text-muted">
             {[["what", "What this is"], ["checks", "The three checks"], ["score", "Score"], ["validation", "Validation"],
               ["sources", "Data sources"], ["ethics", "Responsible use"], ["limits", "Limitations"], ["contact", "Contact"]].map(([id, t]) => (
               <li key={id}><a href={`#${id}`} className="hover:text-ink">{t}</a></li>
@@ -36,11 +36,12 @@ export default function MethodsView() {
           </ol>
         </nav>
 
-        <article className="max-w-prose text-[16px] leading-[1.7] [&_h2]:mt-14 [&_h2]:scroll-mt-6 [&_h2]:text-2xl [&_h3]:mt-8 [&_h3]:text-lg [&_p]:mt-4">
-          <p className="text-[13px] text-muted">Methods and ethics</p>
-          <h1 className="text-3xl leading-tight md:text-4xl">How Ghost Unit Radar decides a polling unit needs a field check</h1>
+        <article className="max-w-prose text-[16px] leading-[1.7] [&_h2]:mt-16 [&_h2]:scroll-mt-16 [&_h2]:text-[30px] [&_h3]:mt-8 [&_h3]:text-lg [&_p]:mt-4">
+          <p className="eyebrow">Methods &amp; ethics</p>
+          <h1 className="mt-2 text-[40px] leading-[1.05] md:text-[56px]">How it decides.</h1>
+          <p className="!mt-3 text-[21px] leading-snug text-muted">Three checks. Plain rules. Every flag explained.</p>
 
-          <div className="mt-6 grid gap-3 rounded-[6px] border border-line bg-surface p-5 text-sm sm:grid-cols-3" role="note">
+          <div className="mt-6 grid gap-3 rounded-[20px] bg-surface p-5 text-sm sm:grid-cols-3" role="note">
             <Notice title="Synthetic registers" tone="text-review">
               Every registered-voter and result-sheet number is generated for this demo and labelled <b>SYNTHETIC</b> wherever it appears.
             </Notice>
@@ -223,7 +224,7 @@ function Li({ t, children }: { t: string; children: React.ReactNode }) {
 }
 function Table({ head, rows, numeric }: { head: string[]; rows: React.ReactNode[][]; numeric?: boolean }) {
   return (
-    <div className="mt-5 overflow-x-auto rounded-[6px] border border-line">
+    <div className="mt-5 overflow-x-auto rounded-[16px] bg-surface">
       <table className="w-full text-sm">
         <thead className="bg-surface text-left text-[13px] text-muted">
           <tr>{head.map((h, k) => <th key={h} scope="col" className={`px-3 py-2.5 font-medium ${numeric && k > 0 ? "text-right" : ""}`}>{h}</th>)}</tr>
@@ -241,7 +242,7 @@ function Table({ head, rows, numeric }: { head: string[]; rows: React.ReactNode[
 }
 function Figure({ caption, children }: { caption: string; children: React.ReactNode }) {
   return (
-    <figure className="mt-4 rounded-[6px] border border-line bg-surface p-4">
+    <figure className="mt-4 rounded-[16px] bg-surface p-4">
       {children}
       <figcaption className="mt-2 text-xs text-muted">{caption}</figcaption>
     </figure>

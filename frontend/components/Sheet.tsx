@@ -36,12 +36,12 @@ export default function Sheet({ label, children, initial = 0.46, snapKey }: {
 
   return (
     <section aria-label={label}
-      className={`fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-[18px] bg-surface shadow-[0_-2px_16px_rgb(0_0_0/0.18)] ${dragging ? "" : "transition-[height] duration-200 ease-out"}`}
+      className={`fixed inset-x-0 bottom-0 z-30 flex flex-col glass rounded-t-[24px] ${dragging ? "" : "transition-[height] duration-200 ease-out"}`}
       style={{ height: `${frac * 100}dvh` }}>
       <button type="button" aria-label={frac > 0.7 ? "Collapse panel" : "Expand panel"}
-        className="flex h-6 shrink-0 touch-none items-center justify-center"
+        className="flex h-7 shrink-0 touch-none items-center justify-center"
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        <span className="h-1 w-9 rounded-full bg-muted/40" />
+        <span className="h-[5px] w-9 rounded-full bg-muted/40" />
       </button>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
     </section>

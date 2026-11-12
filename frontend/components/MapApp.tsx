@@ -12,7 +12,7 @@ import FilterPanel, { DEFAULT_FILTERS, type Counts, type Filters } from "./Filte
 import type { Pad, PointProps, RadarMapHandle } from "./RadarMap";
 import Sheet from "./Sheet";
 import UnitCard from "./UnitCard";
-import { Logo, StatusMark, useTheme, usePrefersReducedMotion } from "./ui";
+import { Icon, Logo, StatusMark, useTheme, usePrefersReducedMotion } from "./ui";
 
 const RadarMap = dynamic(() => import("./RadarMap"), { ssr: false });
 const PANEL = 400; // desktop floating panel width
@@ -198,17 +198,18 @@ export default function MapApp() {
     if (key === "outside") { setFilters({ ...DEFAULT_FILTERS, check: "OUTSIDE_NIGERIA" }); mapApi.current?.fitBounds(WORLD, pad()); }
     if (key === "stacked") { setFilters({ ...DEFAULT_FILTERS, check: "STACKED" }); mapApi.current?.fitNigeria(pad()); }
     if (key === "field") { setFilters({ ...DEFAULT_FILTERS, bands: [false, false, true, false] }); mapApi.current?.fitNigeria(pad()); }
+    if (key === "wrong") { setFilters({ ...DEFAULT_FILTERS, check: "WRONG_STATE" }); mapApi.current?.fitNigeria(pad()); }
   };
 
   // Chips under the search bar: each toggles one simple filter, like the category chips in a maps app.
   const B = filters.bands;
-  const chips: { key: string; label: string; band?: Band; active: boolean; on: () => void }[] = [
-    { key: "field", label: "Field check needed", band: 2, active: !B[0] && !B[1] && B[2] && !B[3],
+  const chips: { key: string; label: string; band?: Band; icon?: string; active: boolean; on: () => void }[] = [
+    { key: "field", label: "Field check", band: 2, active: !B[0] && !B[1] && B[2] && !B[3],
       on: () => setFilters({ ...filters, bands: !B[0] && !B[1] && B[2] && !B[3] ? [true, true, true, true] : [false, false, true, false] }) },
     { key: "review", label: "Review", band: 1, active: !B[0] && B[1] && !B[2] && !B[3],
       on: () => setFilters({ ...filters, bands: !B[0] && B[1] && !B[2] && !B[3] ? [true, true, true, true] : [false, true, false, false] }) },
-    ...([["OUTSIDE_NIGERIA", "Outside Nigeria"], ["WRONG_STATE", "Wrong state"], ["STACKED", "Stacked"], ["CLOCK", "Clock audit"], ["REGISTER_ABOVE_ADULTS", "Register too large"]] as const)
-      .map(([check, label]) => ({ key: check, label, active: filters.check === check,
+    ...([["OUTSIDE_NIGERIA", "Outside Nigeria", "globe"], ["WRONG_STATE", "Wrong state", "pinX"], ["STACKED", "Stacked", "stack"], ["CLOCK", "Clock audit", "clock"], ["REGISTER_ABOVE_ADULTS", "Big register", "people"]] as const)
+      .map(([check, label, icon]) => ({ key: check, label, icon, active: filters.check === check,
         on: () => {
           const next = filters.check === check ? "" : check;
           setFilters({ ...filters, check: next });
@@ -283,16 +284,16 @@ export default function MapApp() {
   );
   const resultsList = (
     <div className="text-[14px]">
-      <p className="px-5 pb-2 pt-4 text-[13px] text-muted">
-        {searchLoading || !search ? "Loading unit names…" : `${fmt(result?.counts.matched)} match${result?.counts.matched === 1 ? "" : "es"} for “${filters.q.trim()}”`}
+      <p className="eyebrow px-6 pb-2 pt-5">
+        {searchLoading || !search ? "Loading…" : `${fmt(result?.counts.matched)} result${result?.counts.matched === 1 ? "" : "s"}`}
       </p>
-      <ul>
+      <ul className="px-2 pb-3">
         {searchResults.map((r) => (
           <li key={r.i}>
-            <button type="button" onClick={() => openUnit(r.i, true, 2500)} className="flex w-full items-center gap-3 px-5 py-2.5 text-left hover:bg-raised/60">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-raised"><StatusMark band={r.band as Band} size={11} /></span>
+            <button type="button" onClick={() => openUnit(r.i, true, 2500)} className="flex w-full items-center gap-3 rounded-[14px] px-4 py-2.5 text-left hover:bg-raised">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-raised"><StatusMark band={r.band as Band} size={11} /></span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium">{r.name}</span>
+                <span className="block truncate text-[15px] font-semibold">{r.name}</span>
                 <span className="block truncate text-[13px] text-muted">{r.sub}</span>
               </span>
               <span className="sr-only">{STATUS[r.band].label}</span>
@@ -303,11 +304,11 @@ export default function MapApp() {
     </div>
   );
   const backHeader = (title: string, onBack: () => void) => (
-    <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-line bg-surface px-2 py-2">
-      <button type="button" onClick={onBack} className="grid h-9 w-9 place-items-center rounded-full hover:bg-raised" aria-label="Back">
-        <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 4 6 10l6 6" /></svg>
+    <div className="glass sticky top-0 z-10 flex items-center gap-1 !shadow-[0_.5px_0_rgb(var(--line))] px-2 py-2.5">
+      <button type="button" onClick={onBack} className="grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-raised" aria-label="Back">
+        <Icon name="back" className="h-5 w-5" strokeWidth={2.2} />
       </button>
-      <span className="font-medium">{title}</span>
+      <span className="text-[17px] font-semibold">{title}</span>
     </div>
   );
   const content = cardOpen ? card
@@ -318,33 +319,33 @@ export default function MapApp() {
     : null;
 
   const searchBar = (
-    <div className="float rise pointer-events-auto flex h-12 items-center gap-1 rounded-full px-1.5 focus-within:ring-2 focus-within:ring-accent/50">
+    <div className="float rise pointer-events-auto flex h-[52px] items-center gap-1 rounded-[18px] px-1.5 focus-within:ring-2 focus-within:ring-accent/40">
       <button type="button" onClick={() => setMenu(true)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink" aria-label="Open menu">
-        <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 6h14M3 10h14M3 14h14" /></svg>
+        <Icon name="menu" className="h-5 w-5" strokeWidth={2} />
       </button>
       <label htmlFor="q" className="sr-only">Search polling units, wards or LGAs</label>
       <input id="q" type="text" role="searchbox" enterKeyHint="search" value={filters.q} autoComplete="off"
         onChange={(e) => { setFilters({ ...filters, q: e.target.value }); if (sel != null) closeUnit(); setView("explore"); }}
-        placeholder="Search polling units, wards, LGAs" className="min-w-0 flex-1 appearance-none border-0 bg-transparent px-1 text-[15px] outline-none placeholder:text-muted focus:outline-none focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden" />
+        placeholder="Search units, wards, LGAs" className="min-w-0 flex-1 appearance-none border-0 bg-transparent px-1 text-[16px] outline-none placeholder:text-muted focus:outline-none focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden" />
       {filters.q ? (
         <button type="button" onClick={() => setFilters({ ...filters, q: "" })} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink" aria-label="Clear search">
-          <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m5 5 10 10M15 5 5 15" /></svg>
+          <Icon name="close" className="h-4 w-4" strokeWidth={2.2} />
         </button>
       ) : <Logo className="h-[22px] w-[22px] shrink-0" animate />}
-      <span className="mx-1 h-6 w-px bg-line" aria-hidden="true" />
+      <span className="mx-0.5 h-6 w-px bg-line" aria-hidden="true" />
       <button type="button" onClick={() => { closeUnit(); setView(view === "filters" ? "explore" : "filters"); }}
         className={`relative grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-raised ${view === "filters" ? "bg-raised text-ink" : "text-muted hover:text-ink"}`} aria-label="Filters" aria-pressed={view === "filters"}>
-        <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 6h9M15 6h2M3 14h2M8 14h9" /><circle cx="13.5" cy="6" r="1.8" /><circle cx="6.5" cy="14" r="1.8" /></svg>
+        <Icon name="sliders" className="h-5 w-5" />
         {filtersActive && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-field" aria-hidden="true" />}
       </button>
     </div>
   );
   const chipRow = (
-    <div className="pointer-events-auto flex gap-2 overflow-x-auto px-0.5 pb-1 [scrollbar-width:none]" role="toolbar" aria-label="Quick filters">
+    <div className="pointer-events-auto flex gap-2 overflow-x-auto px-0.5 pb-3 pt-0.5 [scrollbar-width:none] [mask-image:linear-gradient(to_right,black_90%,transparent)]" role="toolbar" aria-label="Quick filters">
       {chips.map((c, k) => (
         <button key={c.key} type="button" onClick={c.on} aria-pressed={c.active} style={{ animationDelay: `${150 + k * 45}ms` }}
-          className={`press rise flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium shadow-[0_1px_3px_rgb(0_0_0/0.18)] transition-colors ${c.active ? "bg-ink text-bg" : "bg-surface text-ink hover:bg-raised dark:border dark:border-line"}`}>
-          {c.band != null && <StatusMark band={c.band} />}{c.label}
+          className={`press rise flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[14px] font-semibold transition-colors ${c.active ? "bg-ink text-bg shadow-[0_6px_20px_-6px_rgb(0_0_0/.45)]" : "bg-surface text-ink shadow-[0_0_0_.5px_rgb(0_0_0/.08),0_4px_14px_-4px_rgb(0_0_0/.18)] hover:bg-raised dark:shadow-[0_0_0_.5px_rgb(255_255_255/.12)]"}`}>
+          {c.band != null && <StatusMark band={c.band} />}{c.icon && <Icon name={c.icon} className="h-4 w-4" />}{c.label}
         </button>
       ))}
     </div>
@@ -361,11 +362,11 @@ export default function MapApp() {
         <div className="absolute inset-0 grid place-items-center bg-bg">
           <div className="fade-in flex flex-col items-center text-center">
             <Logo className="h-16 w-16" loop />
-            <p className="mt-4 font-display text-[22px]">Ghost Unit Radar</p>
+            <p className="mt-5 text-[28px] font-bold tracking-tight">Ghost Unit Radar</p>
             {error ? <p className="mt-2 text-sm text-field">Could not load data: {error}</p> : (
               <>
-                <p className="mt-1 text-sm text-muted">Loading 176,623 polling units…</p>
-                <div className="loading-bar mt-4 h-[3px] w-40 rounded-full bg-line" role="progressbar" aria-label="Loading" />
+                <p className="mt-1 text-[15px] text-muted">176,623 polling units</p>
+                <div className="loading-bar mt-6 h-1 w-32 rounded-full bg-line" role="progressbar" aria-label="Loading" />
               </>
             )}
           </div>
@@ -373,7 +374,7 @@ export default function MapApp() {
       )}
 
       {toast && (
-        <div className="toast-in pointer-events-none absolute top-20 z-30 flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] text-bg shadow-lg"
+        <div className="toast-in pointer-events-none absolute top-6 z-30 flex items-center gap-2.5 rounded-full bg-ink/90 px-5 py-2.5 text-[14px] font-medium text-bg shadow-[0_12px_40px_-8px_rgb(0_0_0/.5)] backdrop-blur-xl"
           style={{ left: isMobile ? "50%" : `calc(50% + ${PANEL / 2}px)` }} role="status">
           <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-field opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-field" /></span>
           {toast}
@@ -385,21 +386,21 @@ export default function MapApp() {
         <>
           <div className="pointer-events-none absolute bottom-4 left-4 top-4 z-20 flex flex-col gap-3" style={{ width: PANEL }}>
             {presenting ? (
-              <div className="float pointer-events-auto flex items-center gap-3 rounded-2xl px-4 py-3">
-                <Logo /><span className="font-display text-lg">Ghost Unit Radar</span>
-                <span className="ml-auto flex items-center gap-1.5 text-[13px] text-muted"><span className="h-2 w-2 bg-review" aria-hidden="true" />Synthetic registers</span>
+              <div className="float pointer-events-auto flex items-center gap-3 rounded-[18px] px-4 py-3">
+                <Logo /><span className="text-[17px] font-semibold">Ghost Unit Radar</span>
+                <span className="ml-auto rounded-full bg-review/[.12] px-2.5 py-0.5 text-[12px] font-semibold text-review">Synthetic data</span>
               </div>
             ) : searchBar}
             {content && (
               <div key={cardOpen ? `u${sel}` : `${view}-${searching}`} style={{ animationDelay: "60ms" }}
-                className="float rise pointer-events-auto min-h-0 overflow-y-auto overscroll-contain rounded-2xl">{content}</div>
+                className="float rise pointer-events-auto min-h-0 overflow-y-auto overscroll-contain rounded-[24px]">{content}</div>
             )}
           </div>
           {!presenting && (
             <div className="pointer-events-none absolute right-4 top-4 z-10 flex items-start gap-3" style={{ left: PANEL + 32 }}>
               <div className="min-w-0 flex-1 pt-2">{chipRow}</div>
-              <div className="float rise pointer-events-auto mt-1.5 flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px]" style={{ animationDelay: "500ms" }} title="Registered-voter and result-sheet numbers are generated for this demo">
-                <span className="h-2 w-2 bg-review" aria-hidden="true" />Demo · synthetic registers
+              <div className="glass rise pointer-events-auto mt-2 flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-semibold text-review" style={{ animationDelay: "500ms" }} title="Registered-voter and result-sheet numbers are generated for this demo">
+                <span className="h-1.5 w-1.5 rounded-full bg-review" aria-hidden="true" />Synthetic data
               </div>
             </div>
           )}
@@ -422,18 +423,24 @@ export default function MapApp() {
       {/* Round map buttons */}
       {idx && !presenting && (
         <div className="absolute right-4 z-10 flex flex-col gap-2" style={isMobile ? { top: 116 } : { bottom: 40 }}>
-          <Fab label="Zoom in" onClick={() => mapApi.current?.zoomBy(1)}><path d="M10 4v12M4 10h12" /></Fab>
-          <Fab label="Zoom out" onClick={() => mapApi.current?.zoomBy(-1)}><path d="M4 10h12" /></Fab>
-          <Fab label="Show all of Nigeria" onClick={() => mapApi.current?.fitNigeria(pad())}><circle cx="10" cy="10" r="3" /><path d="M10 2v3M10 15v3M2 10h3M15 10h3" /></Fab>
-          <Fab label="Show the whole world" onClick={() => mapApi.current?.fitBounds(WORLD, pad())}><circle cx="10" cy="10" r="7" /><path d="M3 10h14M10 3c2.5 2.5 2.5 11.5 0 14M10 3c-2.5 2.5-2.5 11.5 0 14" /></Fab>
+          <div className="float rise flex flex-col overflow-hidden rounded-[14px]" style={{ animationDelay: "300ms" }}>
+            <Fab label="Zoom in" onClick={() => mapApi.current?.zoomBy(1)} icon="plus" />
+            <span className="mx-2 h-px bg-line" aria-hidden="true" />
+            <Fab label="Zoom out" onClick={() => mapApi.current?.zoomBy(-1)} icon="minus" />
+          </div>
+          <div className="float rise flex flex-col overflow-hidden rounded-[14px]" style={{ animationDelay: "360ms" }}>
+            <Fab label="Show all of Nigeria" onClick={() => mapApi.current?.fitNigeria(pad())} icon="locate" />
+            <span className="mx-2 h-px bg-line" aria-hidden="true" />
+            <Fab label="Show the whole world" onClick={() => mapApi.current?.fitBounds(WORLD, pad())} icon="globe" />
+          </div>
         </div>
       )}
 
       {presenting && showcase.length > 0 && (
         <div className="absolute bottom-6 right-6 z-20 flex justify-center" style={{ left: PANEL + 40 }}>
-          <div className="float flex w-full max-w-[720px] items-center gap-4 rounded-2xl px-5 py-3.5" role="group" aria-label="Presentation controls">
-            <span className="tabular-nums text-sm text-muted">{step + 1} of {showcase.length}</span>
-            <p className="flex-1 font-display text-[17px] leading-snug">{showcase[step]?.caption}</p>
+          <div className="float flex w-full max-w-[720px] items-center gap-4 rounded-[22px] px-5 py-4" role="group" aria-label="Presentation controls">
+            <span className="tabular-nums text-[13px] font-semibold text-muted">{step + 1}/{showcase.length}</span>
+            <p className="flex-1 text-[17px] font-semibold leading-snug tracking-tight">{showcase[step]?.caption}</p>
             <div className="flex gap-1.5">
               <button type="button" className="btn-ghost !rounded-full !px-3" onClick={() => goStep(Math.max(0, step - 1))} disabled={step === 0} aria-label="Previous unit">←</button>
               <button type="button" className="btn-primary !rounded-full !px-3" onClick={() => goStep(Math.min(showcase.length - 1, step + 1))} disabled={step === showcase.length - 1} aria-label="Next unit">→</button>
@@ -446,31 +453,31 @@ export default function MapApp() {
       {/* Side menu */}
       {menu && (
         <div className="fixed inset-0 z-50" role="dialog" aria-label="Menu">
-          <button type="button" className="fade-in absolute inset-0 bg-black/40" aria-label="Close menu" onClick={() => setMenu(false)} />
-          <nav className="slide-in absolute bottom-0 left-0 top-0 flex w-[300px] max-w-[85vw] flex-col bg-surface shadow-2xl">
-            <div className="flex items-center gap-2.5 border-b border-line px-5 py-4">
-              <Logo className="h-7 w-7" animate /><span className="font-display text-[19px]">Ghost Unit Radar</span>
+          <button type="button" className="fade-in absolute inset-0 bg-black/25 backdrop-blur-[2px]" aria-label="Close menu" onClick={() => setMenu(false)} />
+          <nav className="glass slide-in absolute bottom-3 left-3 top-3 flex w-[300px] max-w-[85vw] flex-col rounded-[24px] p-3">
+            <div className="flex items-center gap-2.5 px-3 pb-4 pt-3">
+              <Logo className="h-8 w-8" animate /><span className="text-[19px] font-bold tracking-tight">Ghost Unit Radar</span>
             </div>
-            <p className="flex items-center gap-2 px-5 py-3 text-[13px] text-muted"><span className="h-2 w-2 bg-review" aria-hidden="true" />Demo: voter registers are synthetic</p>
-            <ul className="py-1 text-[15px]">
-              <MenuItem href="/findings/" label="Findings report" />
-              <MenuItem href="/about.html" label="How it works" />
-              <MenuItem href="/methods/" label="Methods & ethics" />
+            <ul className="space-y-0.5 text-[15px] font-medium">
+              <MenuItem href="/findings/" label="Findings" icon="chart" />
+              <MenuItem href="/methods/" label="Methods & ethics" icon="book" />
+              <MenuItem href="/about.html" label="How it works" icon="info" />
               <li>
-                <button type="button" className="flex w-full items-center justify-between px-5 py-3 text-left hover:bg-raised" onClick={toggleTheme}>
-                  {theme === "dark" ? "Light map" : "Dark map"} <Chevron />
+                <button type="button" className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-left hover:bg-raised" onClick={toggleTheme}>
+                  <Icon name={theme === "dark" ? "sun" : "moon"} className="h-5 w-5 text-muted" />{theme === "dark" ? "Light map" : "Dark map"}
                 </button>
               </li>
               {!isMobile && (
                 <li>
-                  <button type="button" className="flex w-full items-center justify-between px-5 py-3 text-left hover:bg-raised" onClick={() => { setMenu(false); togglePresent(); }}>
-                    <span>Presentation mode <kbd className="ml-1 rounded border border-line px-1 font-mono text-[11px] text-muted">P</kbd></span> <Chevron />
+                  <button type="button" className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-left hover:bg-raised" onClick={() => { setMenu(false); togglePresent(); }}>
+                    <Icon name="present" className="h-5 w-5 text-muted" /><span className="flex-1">Present</span>
+                    <kbd className="rounded-[6px] bg-raised px-1.5 font-mono text-[11px] text-muted">P</kbd>
                   </button>
                 </li>
               )}
             </ul>
-            <p className="mt-auto border-t border-line px-5 py-4 text-[12px] leading-relaxed text-muted">
-              Polling-unit list from INEC, retrieved 2022. No INEC system is accessed. A flag means a unit needs field verification, not that anything wrong happened.
+            <p className="mt-auto px-3 pb-2 text-[12px] leading-relaxed text-muted">
+              INEC list, 2022. No INEC system accessed. Registers are synthetic.
             </p>
           </nav>
         </div>
@@ -479,19 +486,21 @@ export default function MapApp() {
   );
 }
 
-function Fab({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+function Fab({ label, onClick, icon }: { label: string; onClick: () => void; icon: string }) {
   return (
     <button type="button" onClick={onClick} aria-label={label} title={label}
-      className="float press rise grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-raised" style={{ animationDelay: "300ms" }}>
-      <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">{children}</svg>
+      className="press grid h-11 w-11 place-items-center text-ink hover:bg-raised/70">
+      <Icon name={icon} className="h-[19px] w-[19px]" strokeWidth={2} />
     </button>
   );
 }
 
-function MenuItem({ href, label }: { href: string; label: string }) {
+function MenuItem({ href, label, icon }: { href: string; label: string; icon: string }) {
   return (
     <li>
-      <a href={href} className="flex items-center justify-between px-5 py-3 hover:bg-raised">{label} <Chevron /></a>
+      <a href={href} className="group flex items-center gap-3 rounded-[12px] px-3 py-2.5 hover:bg-raised">
+        <Icon name={icon} className="h-5 w-5 text-muted" /><span className="flex-1">{label}</span><Chevron />
+      </a>
     </li>
   );
 }

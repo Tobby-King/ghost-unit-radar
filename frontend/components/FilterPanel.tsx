@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { CHECKS, STATUS, fmt, titleCase, type Band, type Summary, type UnitIndex } from "@/lib/data";
-import { StatusMark } from "./ui";
+import { Icon, StatusMark, Switch } from "./ui";
 
 export interface Filters { state: number; lga: number; bands: [boolean, boolean, boolean, boolean]; check: string; q: string }
 export const DEFAULT_FILTERS: Filters = { state: -1, lga: -1, bands: [true, true, true, true], check: "", q: "" };
@@ -25,8 +25,8 @@ interface Props {
   onPickResult: (i: number) => void;
 }
 
-
-export default function FilterPanel({ idx, summary, filters: f, setFilters, counts, spv, setSpv, searching, listSize, onDownloadList, onClearList, onStrangest, results, onPickResult }: Props) {
+/** Filters laid out like a settings screen: grouped rows, switches, one slider. */
+export default function FilterPanel({ idx, summary, filters: f, setFilters, counts, spv, setSpv, listSize, onDownloadList, onClearList }: Props) {
   const noCoord = useMemo(() => new Set(summary.no_coordinate_states), [summary]);
   const lgaOptions = useMemo(
     () => (f.state < 0 ? [] : idx.lgas.map(([s, name], k) => ({ s, name, k })).filter((x) => x.s === f.state).sort((a, b) => a.name.localeCompare(b.name))),
@@ -34,83 +34,90 @@ export default function FilterPanel({ idx, summary, filters: f, setFilters, coun
   );
   const set = (p: Partial<Filters>) => setFilters({ ...f, ...p });
   const dirty = f.state >= 0 || f.lga >= 0 || f.check || f.q || f.bands.some((b) => !b);
-
   const reset = () => setFilters({ ...f, state: -1, lga: -1, bands: [true, true, true, true], check: "", q: "" });
+
   return (
-    <div className="flex flex-col text-[14px]">
-      <div className="border-b border-line px-4 pb-4 pt-4" aria-live="polite">
-        <p className="leading-snug">
-          Showing <b className="tabular-nums">{fmt(counts.matched)}</b> polling units, {fmt(counts.mapped)} with a location.
-          {counts.outside > 0 && <> <b className="tabular-nums text-field">{fmt(counts.outside)}</b> {counts.outside === 1 ? "is" : "are"} placed outside Nigeria.</>}
-        </p>
-        {dirty && <button type="button" className="mt-1.5 text-[13px] text-muted underline underline-offset-2 hover:text-ink" onClick={reset}>Clear filters</button>}
-      </div>
-
-      <div className="space-y-4 border-b border-line px-4 py-4">
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label htmlFor="state" className="label">State</label>
-            <select id="state" className="field" value={f.state} onChange={(e) => set({ state: Number(e.target.value), lga: -1 })}>
-              <option value={-1}>All states</option>
-              {idx.states.map((s, k) => (
-                <option key={s} value={k}>{titleCase(s)}{noCoord.has(s) ? " (no locations)" : ""}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="lga" className="label">LGA</label>
-            <select id="lga" className="field" value={f.lga} disabled={f.state < 0} onChange={(e) => set({ lga: Number(e.target.value) })}>
-              <option value={-1}>{f.state < 0 ? "–" : "All LGAs"}</option>
-              {lgaOptions.map((o) => <option key={o.k} value={o.k}>{titleCase(o.name)}</option>)}
-            </select>
-          </div>
-        </div>
+    <div className="space-y-6 bg-raised/60 px-4 pb-6 pt-5">
+      <div className="flex items-end justify-between px-2" aria-live="polite">
         <div>
-          <label htmlFor="check" className="label">Check</label>
-          <select id="check" className="field" value={f.check} onChange={(e) => set({ check: e.target.value })}>
-            {CHECKS.map((c) => <option key={c.value} value={c.value}>{c.label}{c.source ? ` (${c.source.toLowerCase()})` : ""}</option>)}
-          </select>
+          <p className="text-[34px] font-bold leading-none tracking-tight tabular-nums">{fmt(counts.matched)}</p>
+          <p className="mt-1 text-[13px] text-muted">units shown{counts.outside > 0 && <> · <span className="text-field">{fmt(counts.outside)} abroad</span></>}</p>
         </div>
+        {dirty && <button type="button" className="text-[15px] font-medium text-accent-ink hover:opacity-75" onClick={reset}>Reset</button>}
       </div>
 
-      <fieldset className="border-b border-line px-4 py-4">
-        <legend className="sr-only">Status</legend>
-        <p className="label" aria-hidden="true">Status</p>
+      <Group title="Place">
+        <label className="group-row" htmlFor="state">
+          <span className="flex-1 text-[15px]">State</span>
+          <select id="state" className="row-select" value={f.state} onChange={(e) => set({ state: Number(e.target.value), lga: -1 })}>
+            <option value={-1}>All</option>
+            {idx.states.map((s, k) => <option key={s} value={k}>{titleCase(s)}{noCoord.has(s) ? " (no locations)" : ""}</option>)}
+          </select>
+        </label>
+        <label className="group-row" htmlFor="lga">
+          <span className={`flex-1 text-[15px] ${f.state < 0 ? "text-muted" : ""}`}>LGA</span>
+          <select id="lga" className="row-select" value={f.lga} disabled={f.state < 0} onChange={(e) => set({ lga: Number(e.target.value) })}>
+            <option value={-1}>{f.state < 0 ? "Pick a state" : "All"}</option>
+            {lgaOptions.map((o) => <option key={o.k} value={o.k}>{titleCase(o.name)}</option>)}
+          </select>
+        </label>
+        <label className="group-row" htmlFor="check">
+          <span className="flex-1 text-[15px]">Check</span>
+          <select id="check" className="row-select" value={f.check} onChange={(e) => set({ check: e.target.value })}>
+            {CHECKS.map((c) => <option key={c.value} value={c.value}>{c.value ? c.label : "All"}</option>)}
+          </select>
+        </label>
+      </Group>
+
+      <Group title="Status">
         {STATUS.map((s, b) => (
-          <label key={s.key} className="flex cursor-pointer items-center gap-2.5 py-1">
-            <input type="checkbox" checked={f.bands[b]} className="h-3.5 w-3.5 accent-[rgb(var(--ink))]"
-              onChange={() => { const bands = [...f.bands] as Filters["bands"]; bands[b] = !bands[b]; set({ bands }); }} />
-            <StatusMark band={b as Band} />
-            <span className={`flex-1 ${f.bands[b] ? "" : "text-muted line-through decoration-muted/50"}`}>{s.label}</span>
-            <span className="tabular-nums text-[13px] text-muted">{fmt(counts.byBand[b])}</span>
-          </label>
+          <div key={s.key} className="group-row">
+            <StatusMark band={b as Band} size={11} />
+            <span className="flex-1 text-[15px]">{s.label}</span>
+            <span className="text-[13px] tabular-nums text-muted">{fmt(counts.byBand[b])}</span>
+            <Switch label={s.label} checked={f.bands[b]} onChange={() => { const bands = [...f.bands] as Filters["bands"]; bands[b] = !bands[b]; set({ bands }); }} />
+          </div>
         ))}
-      </fieldset>
+      </Group>
 
-      <div className="border-b border-line px-4 py-4">
-        <label htmlFor="spv" className="label">Clock audit: assume <b className="text-ink">{spv} seconds</b> per voter</label>
-        <input id="spv" type="range" min={30} max={120} step={5} value={spv} onChange={(e) => setSpv(Number(e.target.value))}
-          className="w-full accent-[rgb(var(--ink))]" />
-        <p className="mt-1 text-[13px] leading-relaxed text-muted">A BVAS device takes roughly 30 to 120 seconds per voter. Used only on the synthetic result sheets.</p>
-      </div>
+      <Group title="Clock audit" note="Seconds a BVAS device needs per voter. Synthetic result sheets only.">
+        <div className="px-4 py-3.5">
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="spv" className="text-[15px]">Pace</label>
+            <span className="text-[15px] font-semibold tabular-nums">{spv} s</span>
+          </div>
+          <input id="spv" type="range" min={30} max={120} step={5} value={spv} onChange={(e) => setSpv(Number(e.target.value))}
+            className="mt-2 w-full accent-[rgb(var(--ink))]" />
+          <div className="flex justify-between text-[11px] text-muted"><span>30 s</span><span>120 s</span></div>
+        </div>
+      </Group>
 
-      <div className="border-b border-line px-4 py-4">
-        <p>Your field-verification list: <b className="tabular-nums">{listSize}</b> unit{listSize === 1 ? "" : "s"}</p>
-        <p className="mt-0.5 text-[13px] text-muted">{listSize ? "Kept in this browser only." : "Add units from their card on the map."}</p>
-        {listSize > 0 && (
-          <p className="mt-2 flex gap-4 text-[13px]">
-            <button type="button" className="underline underline-offset-2" onClick={onDownloadList}>Download as CSV</button>
-            <button type="button" className="text-muted underline underline-offset-2 hover:text-ink" onClick={onClearList}>Clear</button>
-          </p>
-        )}
-      </div>
-
-      <div className="px-4 py-4">
-        <button type="button" className="text-[13px] underline underline-offset-2 hover:text-ink" onClick={onStrangest}>Go to the Kogi school placed in Canada →</button>
-        <p className="mt-3 text-[12px] leading-relaxed text-muted">
-          Data processed {summary.generated}. Locations are real public data; registers and result sheets are synthetic.
-        </p>
-      </div>
+      <Group title="My field list" note={listSize ? "Saved in this browser." : "Add units from their card."}>
+        <div className="group-row">
+          <Icon name="flag" className="h-5 w-5 text-muted" />
+          <span className="flex-1 text-[15px]">{listSize} unit{listSize === 1 ? "" : "s"}</span>
+          {listSize > 0 && (
+            <>
+              <button type="button" className="rounded-full bg-ink px-3.5 py-1.5 text-[13px] font-semibold text-bg" onClick={onDownloadList} aria-label="Download as CSV">
+                Download CSV
+              </button>
+              <button type="button" className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-raised hover:text-field" onClick={onClearList} aria-label="Clear list">
+                <Icon name="trash" className="h-[18px] w-[18px]" />
+              </button>
+            </>
+          )}
+        </div>
+      </Group>
     </div>
+  );
+}
+
+function Group({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="eyebrow px-4 pb-1.5">{title}</h3>
+      <div className="group-list">{children}</div>
+      {note && <p className="px-4 pt-1.5 text-[12px] text-muted">{note}</p>}
+    </section>
   );
 }
