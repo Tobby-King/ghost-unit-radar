@@ -1,27 +1,28 @@
-# Demo video script (2 minutes)
+# Demo video and voice-over
 
-A silent screen recording, `demo-video.webm`, is in this folder. Read the voice-over below over it, or record a fresh screen capture following the same steps.
+`demo-video.mp4` is the finished video. It is 2:33 long, 1920 × 1080, H.264 with AAC audio, recorded from the live site. It already has a voice-over and an English caption track. Upload this one.
 
-**Setup before recording:** open https://ghost-unit-radar.vercel.app/#PU000002 in a desktop browser, light map, window about 1440 × 900. Close other tabs. Set seconds per voter back to 45 s.
+Other files:
 
-Speak calmly, at about 140 words per minute. Numbers below are from the 12 Nov 2026 pipeline run.
+- `demo-video-captions.srt`: the same captions as a separate file, for YouTube or Google Drive.
+- `demo-video-no-voice.mp4`: the same video with no sound. Use it if you want to record the voice-over yourself (see below).
 
-| Time | On screen | Voice-over |
+The voice-over is a synthesised voice (macOS “Daniel”). A human voice sounds better. To record your own, play `demo-video-no-voice.mp4` and read the lines below. Each line starts at the time shown, and each fits its scene at a calm pace.
+
+| Starts | On screen | Voice-over |
 |---|---|---|
-| 0:00–0:15 | Map is zoomed to Waterloo, Canada. Click the ◆ unit. The unit card opens: LGEA School Inele, Ugo I & II, Olamaboro, Kogi. Dashed line runs from Canada back to Kogi State. | "This is a primary school in Olamaboro, Kogi State. According to INEC's published polling-unit list, it is in Waterloo, Canada. Nine thousand one hundred and ninety-six kilometres from Kogi." |
-| 0:15–0:30 | Scroll the unit card: reasons, "could be innocent" explanation, score 10. | "Ghost Unit Radar finds problems like this in every polling unit in Nigeria. It gives each unit a score and a plain-English reason. And for every flag, it shows the most likely innocent cause. Here, a geocoder probably matched the school name to a place abroad." |
-| 0:30–0:45 | Zoom out to all of Nigeria. Click the "Outside Nigeria" chip, then "Wrong state", then "Stacked". | "Check one is location integrity, on real public data. Of 176,623 units, 1,515 sit outside Nigeria. 2,243 are in the wrong state. 43,373 are stacked on shared points, so their real location is unknown." |
-| 0:45–1:00 | Click "Field check needed" chip. Open a red unit with a register-too-large reason. Point at the SYNTHETIC label. | "Check two is population plausibility. We count adults within one kilometre from satellite population data, and compare with the register. The registers here are synthetic, as the hackathon rules require, and clearly labelled." |
-| 1:00–1:15 | Click "Clock audit" chip. Open a unit. Move the seconds-per-voter slider from 45 to 30, then to 120. Counts change. | "Check three is a clock audit. One BVAS device needs about 30 to 120 seconds per voter. So there is a physical limit to how many voters can be accredited in a day. You can change the assumption and watch the flags change." |
-| 1:15–1:30 | Click "Add to field-verification list" on two units. Open the filter panel, where "Your field-verification list" shows the count. Click "Download as CSV". | "Observers can build a field-verification list and download it. A flag never says fraud. It says: needs field verification." |
-| 1:30–1:45 | Open /findings/, scroll briefly. Then open /methods/, scroll to the score table and "Responsible use". | "The findings page summarises the results. The methods page shows every rule, every penalty, our data licences and our limits. No black-box model. No personal data. No INEC system was accessed." |
-| 1:45–2:00 | Back to the map, whole of Nigeria. End card: "Ghost Unit Radar · ghost-unit-radar.vercel.app · github.com/Tobby-King/ghost-unit-radar". | "We planted 900 anomalies in the synthetic data, and the checks caught 894. Ghost Unit Radar helps INEC, observers and journalists decide where to look first before 2027. Thank you." |
+| 0:00 | Opening view: the headline and the four figures | Nigeria has 176,623 polling units. Ghost Unit Radar checks every published location, so field teams know where to look first. |
+| 0:12 | “Show the school in Canada”: the map flies from Nigeria to Waterloo | This is a primary school in Olamaboro, Kogi State. According to INEC's published list, it sits in Waterloo, Canada — 9,196 kilometres from Kogi. |
+| 0:25 | The unit card scrolls through its reasons, the innocent explanation and the figures | Every unit gets a plausibility score and a plain-English reason. For every flag, we show the most likely innocent cause. Here, a geocoder probably matched the school's name to a place abroad. |
+| 0:38 | Chips: Outside Nigeria, then Wrong state, then Stacked | Check one is location integrity, on real public data. 1,515 units sit outside Nigeria. 2,243 are placed in the wrong state. And 43,373 are stacked on shared points, so their real location is unknown. |
+| 0:58 | Register too large: a unit whose synthetic register is 18× the adults nearby | Check two is population plausibility. We count adults within one kilometre from satellite population data, and compare that with the register. The registers here are synthetic, as the hackathon rules require, and clearly labelled. |
+| 1:14 | Clock audit: a unit with its accreditation pace | Check three is a clock audit. A BVAS device needs about thirty to a hundred and twenty seconds per voter, so there is a physical limit on how many voters can be accredited in one day. |
+| 1:25 | Added to the field-verification list; seconds-per-voter slider moved 30 → 120; the list and CSV download | Change that assumption, and the flags update instantly. Observers can build a field-verification list and download it as a spreadsheet. A flag never says fraud. It says: needs field verification. |
+| 1:41 | Findings page, by state | The findings page summarises the results, state by state. |
+| 1:48 | Methods page scrolls past rules, licences and limits | The methods page shows every rule, our data licences and our limits. No black-box model. No personal data. No INEC system was accessed. |
+| 2:00 | Presentation mode (P) steps through showcase units | Presentation mode steps through the strangest units, for a briefing room or a newsroom. |
+| 2:16 | End card: name, links, team | We planted 900 anomalies in the synthetic data, and the checks caught 894. Ghost Unit Radar helps INEC, observers and journalists decide where to look first, before 2027. Thank you. |
 
-**Word count of voice-over:** about 280 words, about 2 minutes at a calm pace. If it runs long, cut the findings-page line (1:30).
+Pronunciation: INEC is “eye-neck”; BVAS is “bee-vass”.
 
-**Tips**
-
-- Press **P** for presentation mode if you want the map to step through five showcase units automatically. It is a good fallback if a click misses.
-- Keep the mouse still while speaking key numbers.
-- Do not say "fraud", "rigging" or name any party.
-
+Never say “fraud”, “rigging” or name any party. A flag means *needs field verification*.

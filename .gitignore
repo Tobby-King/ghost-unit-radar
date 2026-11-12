@@ -7,3 +7,4 @@ data/out/
 .vercel
 .env*
 node_modules/
+submission/demo-video-no-voice.mp4

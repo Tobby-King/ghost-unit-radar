@@ -70,10 +70,14 @@ export function Logo({ className = "h-6 w-6", animate = false, loop = false }: {
 }
 
 /* ---------- Count-up for headline numbers (skipped when reduced motion is on) ---------- */
+/** Figures already counted up on this page load. Remounting a panel shows them settled
+ *  instead of replaying the animation, so a half-counted number never reads as real data. */
+const counted = new Set<number>();
 export function useCountUp(target: number, duration = 1300, delay = 0) {
-  const [v, setV] = useState(0);
+  const [v, setV] = useState(() => (counted.has(target) ? target : 0));
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setV(target); return; }
+    if (counted.has(target) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setV(target); return; }
+    counted.add(target);
     let raf = 0;
     const t0 = performance.now() + delay;
     const tick = (now: number) => {

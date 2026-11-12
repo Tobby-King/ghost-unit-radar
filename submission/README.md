@@ -15,9 +15,10 @@ Team: Oluwatobi Olatunji and Jhmeet [CHECK: full name].
 |---|---|
 | `README.md` | This index. |
 | `application-answers.md` | Ready-to-paste answers for the application form, each with a ≤50-word short version. |
-| `demo-video-script.md` | 2-minute demo script: timestamps, on-screen actions and voice-over. |
-| `demo-video.mp4` | 2-minute silent screen recording of the live app (1280×720, H.264). Upload this one. Read the voice-over from the script over it if the form wants narration. |
-| `demo-video.webm` | The same recording in WebM, in case a site prefers it. |
+| `demo-video-script.md` | Voice-over text with start times, for re-recording in your own voice. |
+| `demo-video.mp4` | 2½-minute demo of the live app with voice-over and captions (1920×1080, H.264). **Upload this one.** |
+| `demo-video-captions.srt` | Captions as a separate file, for YouTube or Drive. |
+| `demo-video-no-voice.mp4` | The same video with no sound, if you'd rather record your own voice (local copy only, not in git). |
 | `screenshots/` | Nine screenshots from the live site: map overview, Waterloo unit card, world view of out-of-country units, a clock-audit unit, the Findings report, Methods & Ethics, presentation mode, and two phone views. |
 | `logo/` | The logo: the mark, app icon, favicon and horizontal lockups, as SVG and PNG, for light and dark backgrounds. |
 | `pitch-5min.md` | 5-minute Grand Finale pitch outline (16 Dec 2026, Lagos), with likely questions. |

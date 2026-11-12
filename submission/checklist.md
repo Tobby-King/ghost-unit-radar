@@ -19,7 +19,7 @@ Deadline: **Thursday 12 November 2026, 11:59 pm WAT.**
 - ✅ Application answers drafted: `application-answers.md`
 - ✅ Demo video script: `demo-video-script.md`
 - ✅ Grand Finale pitch outline: `pitch-5min.md`
-- ✅ 2-minute demo video recorded from the live site: `demo-video.mp4` (and `.webm`)
+- ✅ Demo video recorded from the live site, 1080p with voice-over and captions: `demo-video.mp4` (2:33)
 - ✅ Screenshots (`screenshots/`) and logo files (`logo/`)
 - ✅ Latest code pushed to GitHub
 
@@ -30,7 +30,7 @@ Deadline: **Thursday 12 November 2026, 11:59 pm WAT.**
 - ☐ Confirm **team size ≤4** (currently 2: Oluwatobi Olatunji and Jhmeet).
 - ☐ Confirm the project has **not previously won a grant or award** elsewhere.
 - ☐ Fill in team names and roles: Jhmeet's full name and role are [CHECK].
-- ☐ If the form asks for a video: upload `demo-video.mp4` (YouTube unlisted or Google Drive, "anyone with the link") and paste the link. Optional: add a voice-over using `demo-video-script.md`.
+- ☐ If the form asks for a video: upload `demo-video.mp4` (YouTube unlisted or Google Drive, "anyone with the link") and paste the link.
 - ☐ Re-read the official rules on ai4elections.risenetworks.org for any word limits or required fields not covered here.
 - ☐ Open the live site once on a phone and once on a laptop just before submitting.
 - ☐ Save a copy (screenshot or PDF) of the submitted form and the confirmation email.
