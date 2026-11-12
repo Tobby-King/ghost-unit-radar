@@ -1,5 +1,7 @@
 # Ghost Unit Radar
 
+**Live demo: https://ghost-unit-radar.vercel.app** · [Waterloo unit](https://ghost-unit-radar.vercel.app/#N~PU000002) · [Methods & Ethics](https://ghost-unit-radar.vercel.app/methods.html)
+
 **Checks every Nigerian polling unit against what satellites can see.** Entry for the AI4Elections Hackathon 2026
 (tracks: Electoral data analysis · Election observation and citizen accountability).
 

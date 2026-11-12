@@ -1,0 +1,8 @@
+data/raw/
+data/out/
+pipeline/
+earth_engine/
+scripts/
+.venv/
+*.py
+requirements.txt

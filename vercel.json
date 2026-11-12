@@ -1,5 +1,7 @@
 {
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
   "outputDirectory": "web",
-  "cleanUrls": false,
   "headers": [{ "source": "/data/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }]
 }
