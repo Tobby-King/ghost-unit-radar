@@ -1,6 +1,6 @@
 # Demo video and voice-over
 
-`demo-video.mp4` is the finished video. It is 2:35 long, 1920 × 1080, H.264 with AAC audio, recorded from the live site. It already has a voice-over and an English caption track. Upload this one.
+`demo-video.mp4` is the finished video. It is 2:38 long, 1920 × 1080, H.264 with AAC audio, recorded from the live site. It already has a voice-over and an English caption track. Upload this one.
 
 Other files:
 
