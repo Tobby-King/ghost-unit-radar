@@ -46,7 +46,7 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
 
   return (
     <article className="flex min-h-full flex-col text-[14px]" aria-labelledby="unit-name">
-      <header className="px-5 pb-5 pt-4">
+      <header className="rise px-5 pb-5 pt-4">
         <div className="flex items-center justify-between gap-3 text-[13px] text-muted">
           <span>Polling unit <span className="font-mono">{u.uid}</span></span>
           <button type="button" onClick={onClose} className="-mr-2 grid h-9 w-9 place-items-center rounded-full bg-raised text-ink hover:bg-line" aria-label="Close unit card">
@@ -58,12 +58,12 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
           {titleCase(u.ward)} ward, {titleCase(u.lga)} LGA, {stateName(u.state)}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-          <StatusPill band={u.band} size="lg" />
+          <span className="stamp inline-block"><StatusPill band={u.band} size="lg" /></span>
           <span className="text-[13px] text-muted">Plausibility score {u.score} of 100</span>
         </div>
       </header>
 
-      <section className="border-t border-line px-5 py-5" aria-labelledby="why">
+      <section className="rise border-t border-line px-5 py-5" style={{ animationDelay: "120ms" }} aria-labelledby="why">
         <h3 id="why" className="font-sans text-[15px] font-semibold">Why it was flagged</h3>
         {reasons.length === 0 && !clockHit ? (
           <p className="mt-2 text-muted">
@@ -72,7 +72,7 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
         ) : (
           <ol className="mt-3 space-y-4">
             {reasons.map((r, k) => (
-              <li key={r.code} className="grid grid-cols-[18px_1fr] gap-x-2">
+              <li key={r.code} className="rise grid grid-cols-[18px_1fr] gap-x-2" style={{ animationDelay: `${220 + k * 120}ms` }}>
                 <span className="text-muted">{k + 1}.</span>
                 <div>
                   <p className="leading-relaxed">{plainReason(r, u, centroids)}</p>
@@ -90,7 +90,7 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
       </section>
 
       {clock && (
-        <section className="border-t border-line px-5 py-5" aria-labelledby="clock">
+        <section className="rise border-t border-line px-5 py-5" style={{ animationDelay: "320ms" }} aria-labelledby="clock">
           <h3 id="clock" className="font-sans text-[15px] font-semibold">Clock audit <SourceTag source="SYNTHETIC" /></h3>
           <p className="mt-2 leading-relaxed">
             {clock.text}
@@ -104,7 +104,7 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
         </section>
       )}
 
-      <section className="border-t border-line px-5 py-5" aria-labelledby="numbers">
+      <section className="rise border-t border-line px-5 py-5" style={{ animationDelay: "420ms" }} aria-labelledby="numbers">
         <h3 id="numbers" className="font-sans text-[15px] font-semibold">The figures</h3>
         <table className="mt-2 w-full">
           <tbody className="[&_td]:py-1.5 [&_tr]:border-b [&_tr]:border-dotted [&_tr]:border-line">
@@ -124,10 +124,10 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
       </section>
 
       <div className="flex gap-2 border-t border-line px-5 py-4">
-        <button type="button" onClick={onToggleList} className={inList ? "btn-ghost flex-1" : "btn-primary flex-1"} aria-pressed={inList}>
+        <button type="button" onClick={onToggleList} className={`press flex-1 !rounded-full ${inList ? "btn-ghost" : "btn-primary"}`} aria-pressed={inList}>
           {inList ? `On your list (${listSize})` : "Add to field-verification list"}
         </button>
-        <button type="button" onClick={copy} className="btn-ghost" aria-live="polite">{copied ? "Copied" : "Copy details"}</button>
+        <button type="button" onClick={copy} className="btn-ghost press !rounded-full" aria-live="polite">{copied ? "Copied" : "Copy details"}</button>
       </div>
       <p className="mt-auto px-5 pb-5 text-[13px] leading-relaxed text-muted">
         A flag means this unit needs field verification. It is not evidence of wrongdoing.

@@ -52,15 +52,43 @@ export function SourceTag({ source }: { source: string }) {
   );
 }
 
-/* ---------- Brand mark: a plain survey crosshair ---------- */
-export function Logo({ className = "h-6 w-6" }: { className?: string }) {
+/* ---------- Brand mark: a pin whose point has drifted away from it ----------
+   The pin is where a polling unit should be; its centre is empty (the "ghost"); the red point
+   has drifted off along a dashed trail - which is exactly what the tool finds in the data. */
+export const MARK = {
+  pin: "M13 29.4C10.8 26.5 4.6 20.3 4.6 13.5a8.4 8.4 0 0 1 16.8 0c0 6.8-6.2 13-8.4 15.9ZM13 9.9a3.6 3.6 0 1 0 .001 0Z",
+  tether: "M15.4 11L23.6 7.7",
+};
+export function Logo({ className = "h-6 w-6", animate = false, loop = false }: { className?: string; animate?: boolean; loop?: boolean }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <circle cx="16" cy="16" r="9" fill="none" stroke="rgb(var(--ink))" strokeWidth="2" />
-      <path d="M16 3v6M16 23v6M3 16h6M23 16h6" stroke="rgb(var(--ink))" strokeWidth="2" />
-      <circle cx="16" cy="16" r="2.6" fill="rgb(var(--st-field))" />
+    <svg viewBox="0 0 32 32" className={`${className} ${animate ? "logo-anim" : ""} ${loop ? "logo-loop" : ""}`} aria-hidden="true">
+      <path className="logo-pin" d={MARK.pin} fill="rgb(var(--ink))" fillRule="evenodd" />
+      <path className="logo-tether" d={MARK.tether} stroke="#E2574C" strokeWidth="1.4" strokeDasharray="1.5 1.5" strokeLinecap="round" />
+      <circle className="logo-dot" cx="26.2" cy="5.8" r="3.1" fill="#E2574C" />
     </svg>
   );
+}
+
+/* ---------- Count-up for headline numbers (skipped when reduced motion is on) ---------- */
+export function useCountUp(target: number, duration = 1300, delay = 0) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setV(target); return; }
+    let raf = 0;
+    const t0 = performance.now() + delay;
+    const tick = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - t0) / duration));
+      setV(Math.round(target * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, delay]);
+  return v;
+}
+export function CountUp({ value, delay = 0, duration }: { value: number; delay?: number; duration?: number }) {
+  const v = useCountUp(value, duration, delay);
+  return <span className="tabular-nums">{v.toLocaleString("en-NG")}</span>;
 }
 
 /* ---------- Theme ---------- */
@@ -104,7 +132,7 @@ export function TopBar({ active, children }: { active: "/" | "/findings/" | "/me
   return (
     <header className="relative z-30 flex h-[52px] shrink-0 items-center gap-4 border-b border-line bg-bg px-4 md:gap-6">
       <Link href="/" className="flex items-center gap-2" aria-label="Ghost Unit Radar – map">
-        <Logo />
+        <Logo animate />
         <span className="font-display text-[18px] leading-none max-[440px]:hidden">Ghost Unit Radar</span>
       </Link>
       <p className="hidden items-center gap-1.5 text-[13px] text-muted sm:flex" title="Registered-voter and result-sheet numbers are generated for this demo">

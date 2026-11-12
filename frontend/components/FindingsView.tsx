@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { BAND_FROM_NAME, LABEL, fmt, getJSON, titleCase, type Findings, type StateFinding, type Summary } from "@/lib/data";
-import { SourceTag, StatusPill, TopBar } from "./ui";
+import { CountUp, SourceTag, StatusPill, TopBar } from "./ui";
 
 const MEASURES: { key: keyof StateFinding; label: string; note: string }[] = [
   { key: "outside", label: "Outside Nigeria", note: "Published coordinate falls outside the country" },
@@ -79,7 +79,7 @@ export default function FindingsView() {
           {(head.length ? head : Array.from({ length: 6 }, (): (typeof head)[number] => ({ label: "…", value: undefined }))).map((h, k) => (
             <div key={k} className="bg-surface p-4">
               <p className="text-[13px] text-muted">{h.label}</p>
-              <p className="mt-1 font-display text-[28px] leading-none tabular-nums">{fmt(h.value)}</p>
+              <p className="mt-1 font-display text-[28px] leading-none tabular-nums">{h.value == null ? "–" : <CountUp value={h.value} delay={k * 90} />}</p>
               {h.note && <p className="mt-1.5 truncate text-xs text-muted">{h.note}</p>}
             </div>
           ))}
@@ -101,7 +101,7 @@ export default function FindingsView() {
             </div>
           </div>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_260px]">
-            <ol className="panel space-y-[3px] p-4" onMouseLeave={() => setHover(null)}>
+            <ol key={measure} className="panel space-y-[3px] p-4" onMouseLeave={() => setHover(null)}>
               {bars.map((b) => {
                 const v = b[measure] as number;
                 return (
@@ -111,7 +111,7 @@ export default function FindingsView() {
                       aria-label={`${titleCase(b.state)}: ${fmt(v)}`}>
                       <span className="truncate text-muted">{titleCase(b.state)}</span>
                       <span className="flex h-3 items-center">
-                        <span className={`h-3 rounded-r-[4px] ${hover === b.state ? "bg-ink" : "bg-ink/55"}`} style={{ width: v ? `${Math.max(0.6, (v / max) * 100)}%` : 0 }} />
+                        <span className={`grow-x h-3 rounded-r-[4px] transition-colors ${hover === b.state ? "bg-ink" : "bg-ink/55"}`} style={{ width: v ? `${Math.max(0.6, (v / max) * 100)}%` : 0, animationDelay: `${Math.min(bars.indexOf(b), 20) * 25}ms` }} />
                       </span>
                       <span className="text-right tabular-nums text-ink">{fmt(v)}</span>
                     </button>

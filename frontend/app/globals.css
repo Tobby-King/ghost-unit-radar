@@ -82,6 +82,33 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .maplibregl-popup-tip { display: none; }
 
 
+/* ---------- Motion ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes drift { from { transform: translate(-13.2px, 7.7px) scale(.55); } 60% { transform: translate(1px, -.6px) scale(1.05); } to { transform: none; } }
+@keyframes drift-loop { 0%, 12% { transform: translate(-13.2px, 7.7px) scale(.55); } 55%, 88% { transform: none; } 100% { transform: translate(-13.2px, 7.7px) scale(.55); } }
+@keyframes tether { 0%, 30% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes tether-loop { 0%, 25% { opacity: 0; } 55%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes pin-drop { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@keyframes slide-in { from { transform: translateX(-100%); } to { transform: none; } }
+.slide-in { animation: slide-in .32s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes stamp { 0% { opacity: 0; transform: scale(1.6) rotate(-6deg); } 55% { opacity: 1; transform: scale(.94) rotate(-1.5deg); } 75% { transform: scale(1.03) rotate(-.5deg); } 100% { transform: none; } }
+.stamp { animation: stamp .6s .25s cubic-bezier(.3, .7, .3, 1) both; }
+.rise { animation: rise .55s cubic-bezier(.2, .8, .2, 1) both; }
+.fade-in { animation: fade .4s ease-out both; }
+.toast-in { animation: toast-in .45s cubic-bezier(.2, .8, .2, 1) both; }
+.grow-x { transform-origin: left center; animation: grow-x .9s cubic-bezier(.2, .8, .2, 1) both; }
+.logo-anim .logo-pin { animation: pin-drop .5s ease-out both; }
+.logo-anim .logo-dot { transform-box: fill-box; transform-origin: center; animation: drift 1.3s .25s cubic-bezier(.2, .8, .2, 1) both; }
+.logo-anim .logo-tether { animation: tether 1.3s .25s ease-out both; }
+.logo-loop .logo-dot { transform-box: fill-box; transform-origin: center; animation: drift-loop 2.6s cubic-bezier(.45, 0, .2, 1) infinite; }
+.logo-loop .logo-tether { animation: tether-loop 2.6s ease-in-out infinite; }
+.press { transition: transform .12s ease; } .press:active { transform: scale(.96); }
+.loading-bar { position: relative; overflow: hidden; } .loading-bar::after { content: ""; position: absolute; inset: 0; width: 40%; background: rgb(var(--ink)); border-radius: inherit; animation: shimmer 1.1s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
 }

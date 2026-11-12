@@ -1,7 +1,7 @@
 "use client";
 
 import { fmt, titleCase, uidToIndex, type Band, type Showcase, type Summary, type UnitIndex } from "@/lib/data";
-import { StatusMark } from "./ui";
+import { CountUp, StatusMark } from "./ui";
 
 export type QuickKey = "all" | "outside" | "stacked" | "field";
 
@@ -31,24 +31,24 @@ export default function ExplorePanel({ summary, idx, showcase, onQuick, onOpen, 
       <div className="px-5 pb-5 pt-5">
         <p className="text-[13px] text-muted">INEC polling-unit list, 2022 · checked against public map data</p>
         <h1 className="mt-2 text-[23px] leading-[1.2]">
-          Of {fmt(n.units)} polling units, {fmt(n.outside_nigeria)} are placed outside Nigeria.
+          Of <CountUp value={n.units} duration={1400} /> polling units, <span className="text-field"><CountUp value={n.outside_nigeria} delay={500} duration={1500} /></span> are placed outside Nigeria.
         </h1>
         <p className="mt-2.5 leading-relaxed text-ink/80">
           One Kogi State primary school is mapped to Waterloo, Canada. Every published location is checked, so field teams know where to look first.
         </p>
-        <button type="button" className="btn-primary mt-4 w-full !rounded-full !py-3 text-[15px]" disabled={!ready || !showcase[0]}
+        <button type="button" className="btn-primary press rise mt-4 w-full !rounded-full !py-3 text-[15px]" style={{ animationDelay: "350ms" }} disabled={!ready || !showcase[0]}
           onClick={() => showcase[0] && onOpen(uidToIndex(showcase[0].uid), 0)}>
           Show the school in Canada
         </button>
       </div>
 
       <ul className="border-t border-line">
-        {figures.map((f) => (
-          <li key={f.key} className="border-b border-line">
-            <button type="button" onClick={() => onQuick(f.key)} className="flex w-full items-center gap-3 px-5 py-3 text-left hover:bg-raised/60">
+        {figures.map((f, k) => (
+          <li key={f.key} className="rise border-b border-line" style={{ animationDelay: `${450 + k * 70}ms` }}>
+            <button type="button" onClick={() => onQuick(f.key)} className="group flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-raised/60">
               <span className="min-w-0 flex-1">
                 <span className="flex items-baseline gap-2">
-                  <span className={`font-display text-[21px] leading-none tabular-nums ${f.tone ?? ""}`}>{fmt(f.value)}</span>
+                  <span className={`font-display text-[21px] leading-none tabular-nums ${f.tone ?? ""}`}><CountUp value={f.value} delay={450 + k * 70} /></span>
                   <span>{f.label}</span>
                 </span>
                 <span className="mt-0.5 block text-[13px] leading-snug text-muted">{f.fact}</span>
@@ -66,7 +66,7 @@ export default function ExplorePanel({ summary, idx, showcase, onQuick, onOpen, 
         {showcase.map((s, k) => {
           const i = uidToIndex(s.uid);
           return (
-            <li key={s.uid}>
+            <li key={s.uid} className="rise" style={{ animationDelay: `${750 + k * 60}ms` }}>
               <button type="button" onClick={() => onOpen(i, k)} className="flex w-full items-start gap-3 px-5 py-2.5 text-left hover:bg-raised/60">
                 <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-raised">
                   <StatusMark band={idx.band[i] as Band} size={11} />
@@ -88,5 +88,5 @@ export default function ExplorePanel({ summary, idx, showcase, onQuick, onOpen, 
 }
 
 export function Chevron() {
-  return <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m8 5 5 5-5 5" /></svg>;
+  return <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m8 5 5 5-5 5" /></svg>;
 }

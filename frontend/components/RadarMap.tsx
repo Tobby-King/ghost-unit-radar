@@ -124,7 +124,7 @@ export default function RadarMap(props: Props) {
       map.addLayer({ id: "border-line", type: "line", source: "border",
         paint: { "line-color": HEX.accent, "line-width": ["interpolate", ["linear"], ["zoom"], 2, 0.8, 8, 1.8], "line-opacity": 0.9 } });
       map.addLayer({ id: "links-line", type: "line", source: "links", layout: { "line-cap": "round" },
-        paint: { "line-color": HEX.field, "line-width": 1, "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, 0.55, 3, 0.4, 4.5, 0.12, 5.5, 0.05], "line-dasharray": [2, 3] } });
+        paint: { "line-color": HEX.field, "line-width": 1.1, "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, 0.6, 3, 0.45, 4.5, 0.12, 5.5, 0.05], "line-dasharray": [0, 4, 3] } });
       map.addLayer({ id: "clusters", type: "circle", source: "units", filter: ["has", "point_count"],
         paint: {
           "circle-color": s.raised,
@@ -146,8 +146,10 @@ export default function RadarMap(props: Props) {
           "circle-stroke-width": ["match", ["get", "b"], 0, 0, 1.2],
           "circle-stroke-color": s.bg,
         } });
+      map.addLayer({ id: "selected-pulse", type: "circle", source: "selected",
+        paint: { "circle-radius": 14, "circle-color": HEX.accent, "circle-opacity": 0, "circle-stroke-color": HEX.accent, "circle-stroke-width": 1.5, "circle-stroke-opacity": 0 } });
       map.addLayer({ id: "selected-halo", type: "circle", source: "selected",
-        paint: { "circle-radius": 15, "circle-color": "transparent", "circle-stroke-color": HEX.accent, "circle-stroke-width": 2 } });
+        paint: { "circle-radius": 13, "circle-color": "transparent", "circle-stroke-color": HEX.accent, "circle-stroke-width": 2.5 } });
       map.addLayer({ id: "selected-dot", type: "circle", source: "selected",
         paint: { "circle-radius": 4, "circle-color": HEX.accent } });
     }
@@ -155,6 +157,27 @@ export default function RadarMap(props: Props) {
       addOverlays();
       live.current.onReady?.();
     });
+
+    // Motion: dashes march from each misplaced coordinate back toward its state; the selected unit pulses like sonar.
+    const DASHES: number[][] = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0],
+      [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]];
+    let raf = 0, lastDash = -1;
+    const animate = (now: number) => {
+      raf = requestAnimationFrame(animate);
+      if (live.current.reducedMotion || !map.isStyleLoaded()) return;
+      const step = Math.floor(now / 70) % DASHES.length;
+      if (step !== lastDash && map.getLayer("links-line")) {
+        lastDash = step;
+        map.setPaintProperty("links-line", "line-dasharray", DASHES[step]);
+      }
+      if (map.getLayer("selected-pulse")) {
+        const t = (now % 1800) / 1800;
+        map.setPaintProperty("selected-pulse", "circle-radius", 13 + 30 * t);
+        map.setPaintProperty("selected-pulse", "circle-stroke-opacity", 0.9 * (1 - t));
+        map.setPaintProperty("selected-pulse", "circle-opacity", 0.12 * (1 - t));
+      }
+    };
+    raf = requestAnimationFrame(animate);
 
     map.on("click", "clusters", async (e) => {
       const f = e.features?.[0] as MapGeoJSONFeature | undefined;
@@ -191,6 +214,7 @@ export default function RadarMap(props: Props) {
     window.addEventListener("gur-theme", onTheme);
     return () => {
       window.removeEventListener("gur-theme", onTheme);
+      cancelAnimationFrame(raf);
       map.remove();
       mapRef.current = null;
     };

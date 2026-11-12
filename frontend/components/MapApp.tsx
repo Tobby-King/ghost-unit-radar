@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import {
-  FLAG_BITS, STATUS, clockFlag, fmt, getJSON, inNigeriaBox, indexToUid, loadUnit, titleCase, uidToIndex,
+  FLAG_BITS, STATUS, clockFlag, fmt, getJSON, haversineKm, inNigeriaBox, indexToUid, loadUnit, stateName, titleCase, uidToIndex,
   type Band, type SearchIndex, type Showcase, type Summary, type UnitDetail, type UnitIndex,
 } from "@/lib/data";
 import ExplorePanel, { Chevron, type QuickKey } from "./ExplorePanel";
@@ -48,6 +48,7 @@ export default function MapApp() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [view, setView] = useState<"explore" | "filters">("explore");
   const [menu, setMenu] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [presenting, setPresenting] = useState(false);
   const [step, setStep] = useState(0);
   const [fv, setFv] = useState<string[]>([]);
@@ -151,8 +152,15 @@ export default function MapApp() {
     const s = showcase[0];
     if (!s) return;
     setFilters(DEFAULT_FILTERS);
-    openUnit(uidToIndex(s.uid), true, 5200);
-  }, [showcase, openUnit]);
+    const i = uidToIndex(s.uid);
+    const c = centroids[s.state];
+    if (idx && c && idx.lat[i] != null) {
+      const km = haversineKm(idx.lat[i]!, idx.lon[i]!, c[1], c[0]);
+      setToast(`Following the official coordinate · ${fmt(km)} km from ${stateName(s.state)}`);
+      setTimeout(() => setToast(null), reduced ? 3000 : 5600);
+    }
+    openUnit(i, true, 5200);
+  }, [showcase, openUnit, centroids, idx, reduced]);
 
   // Deep link (#PU000002, also the old #N~PU000002 form) once data and map are ready.
   useEffect(() => {
@@ -310,7 +318,7 @@ export default function MapApp() {
     : null;
 
   const searchBar = (
-    <div className="float pointer-events-auto flex h-12 items-center gap-1 rounded-full px-1.5 focus-within:ring-2 focus-within:ring-accent/50">
+    <div className="float rise pointer-events-auto flex h-12 items-center gap-1 rounded-full px-1.5 focus-within:ring-2 focus-within:ring-accent/50">
       <button type="button" onClick={() => setMenu(true)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink" aria-label="Open menu">
         <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 6h14M3 10h14M3 14h14" /></svg>
       </button>
@@ -322,7 +330,7 @@ export default function MapApp() {
         <button type="button" onClick={() => setFilters({ ...filters, q: "" })} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink" aria-label="Clear search">
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m5 5 10 10M15 5 5 15" /></svg>
         </button>
-      ) : <Logo className="h-5 w-5 shrink-0 opacity-80" />}
+      ) : <Logo className="h-[22px] w-[22px] shrink-0" animate />}
       <span className="mx-1 h-6 w-px bg-line" aria-hidden="true" />
       <button type="button" onClick={() => { closeUnit(); setView(view === "filters" ? "explore" : "filters"); }}
         className={`relative grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-raised ${view === "filters" ? "bg-raised text-ink" : "text-muted hover:text-ink"}`} aria-label="Filters" aria-pressed={view === "filters"}>
@@ -333,9 +341,9 @@ export default function MapApp() {
   );
   const chipRow = (
     <div className="pointer-events-auto flex gap-2 overflow-x-auto px-0.5 pb-1 [scrollbar-width:none]" role="toolbar" aria-label="Quick filters">
-      {chips.map((c) => (
-        <button key={c.key} type="button" onClick={c.on} aria-pressed={c.active}
-          className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium shadow-[0_1px_3px_rgb(0_0_0/0.18)] ${c.active ? "bg-ink text-bg" : "bg-surface text-ink hover:bg-raised dark:border dark:border-line"}`}>
+      {chips.map((c, k) => (
+        <button key={c.key} type="button" onClick={c.on} aria-pressed={c.active} style={{ animationDelay: `${150 + k * 45}ms` }}
+          className={`press rise flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium shadow-[0_1px_3px_rgb(0_0_0/0.18)] transition-colors ${c.active ? "bg-ink text-bg" : "bg-surface text-ink hover:bg-raised dark:border dark:border-line"}`}>
           {c.band != null && <StatusMark band={c.band} />}{c.label}
         </button>
       ))}
@@ -350,11 +358,25 @@ export default function MapApp() {
           onSelect={(i) => openUnit(i, false)} onReady={() => setMapReady(true)} />
       )}
       {!idx && (
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="flex items-center gap-3 text-sm text-muted">
-            <Logo className="h-7 w-7" />
-            {error ? <span>Could not load data: {error}</span> : <span>Loading 176,623 polling units…</span>}
+        <div className="absolute inset-0 grid place-items-center bg-bg">
+          <div className="fade-in flex flex-col items-center text-center">
+            <Logo className="h-16 w-16" loop />
+            <p className="mt-4 font-display text-[22px]">Ghost Unit Radar</p>
+            {error ? <p className="mt-2 text-sm text-field">Could not load data: {error}</p> : (
+              <>
+                <p className="mt-1 text-sm text-muted">Loading 176,623 polling units…</p>
+                <div className="loading-bar mt-4 h-[3px] w-40 rounded-full bg-line" role="progressbar" aria-label="Loading" />
+              </>
+            )}
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="toast-in pointer-events-none absolute top-20 z-30 flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] text-bg shadow-lg"
+          style={{ left: isMobile ? "50%" : `calc(50% + ${PANEL / 2}px)` }} role="status">
+          <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-field opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-field" /></span>
+          {toast}
         </div>
       )}
 
@@ -369,13 +391,14 @@ export default function MapApp() {
               </div>
             ) : searchBar}
             {content && (
-              <div className="float pointer-events-auto min-h-0 overflow-y-auto overscroll-contain rounded-2xl">{content}</div>
+              <div key={cardOpen ? `u${sel}` : `${view}-${searching}`} style={{ animationDelay: "60ms" }}
+                className="float rise pointer-events-auto min-h-0 overflow-y-auto overscroll-contain rounded-2xl">{content}</div>
             )}
           </div>
           {!presenting && (
             <div className="pointer-events-none absolute right-4 top-4 z-10 flex items-start gap-3" style={{ left: PANEL + 32 }}>
               <div className="min-w-0 flex-1 pt-2">{chipRow}</div>
-              <div className="float pointer-events-auto mt-1.5 flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px]" title="Registered-voter and result-sheet numbers are generated for this demo">
+              <div className="float rise pointer-events-auto mt-1.5 flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px]" style={{ animationDelay: "500ms" }} title="Registered-voter and result-sheet numbers are generated for this demo">
                 <span className="h-2 w-2 bg-review" aria-hidden="true" />Demo · synthetic registers
               </div>
             </div>
@@ -423,10 +446,10 @@ export default function MapApp() {
       {/* Side menu */}
       {menu && (
         <div className="fixed inset-0 z-50" role="dialog" aria-label="Menu">
-          <button type="button" className="absolute inset-0 bg-black/40" aria-label="Close menu" onClick={() => setMenu(false)} />
-          <nav className="absolute bottom-0 left-0 top-0 flex w-[300px] max-w-[85vw] flex-col bg-surface shadow-2xl">
+          <button type="button" className="fade-in absolute inset-0 bg-black/40" aria-label="Close menu" onClick={() => setMenu(false)} />
+          <nav className="slide-in absolute bottom-0 left-0 top-0 flex w-[300px] max-w-[85vw] flex-col bg-surface shadow-2xl">
             <div className="flex items-center gap-2.5 border-b border-line px-5 py-4">
-              <Logo /><span className="font-display text-[19px]">Ghost Unit Radar</span>
+              <Logo className="h-7 w-7" animate /><span className="font-display text-[19px]">Ghost Unit Radar</span>
             </div>
             <p className="flex items-center gap-2 px-5 py-3 text-[13px] text-muted"><span className="h-2 w-2 bg-review" aria-hidden="true" />Demo: voter registers are synthetic</p>
             <ul className="py-1 text-[15px]">
@@ -459,7 +482,7 @@ export default function MapApp() {
 function Fab({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick} aria-label={label} title={label}
-      className="float grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-raised">
+      className="float press rise grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-raised" style={{ animationDelay: "300ms" }}>
       <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">{children}</svg>
     </button>
   );
