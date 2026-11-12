@@ -13,8 +13,8 @@ const STYLE = {
 };
 const HEX = { ok: "#4C9F8B", review: "#E0A43A", field: "#E2574C", none: "#7A869C", accent: "#3FB8C9" };
 const SURF = {
-  dark: { bg: "#0B1220", water: "#0F192C", raised: "#1A2540", text: "#E6EBF4" },
-  light: { bg: "#F6F7FA", water: "#E3E8F0", raised: "#FFFFFF", text: "#0E1626" },
+  dark: { bg: "#0F1114", water: "#15191E", raised: "#1E2227", text: "#E9E6DF" },
+  light: { bg: "#F7F6F2", water: "#E2E6E9", raised: "#FFFFFF", text: "#181816" },
 };
 
 export type PointProps = { i: number; b: number };
@@ -124,8 +124,8 @@ export default function RadarMap(props: Props) {
         paint: {
           "circle-color": s.raised,
           "circle-opacity": 0.92,
-          "circle-radius": ["step", ["get", "point_count"], 12, 50, 15, 500, 19, 3000, 24],
-          "circle-stroke-width": ["step", ["get", "point_count"], 1.5, 500, 2],
+          "circle-radius": ["step", ["get", "point_count"], 11, 50, 14, 500, 17, 3000, 21],
+          "circle-stroke-width": 1.5,
           "circle-stroke-color": ["case", [">", ["get", "red"], 0], HEX.field, [">", ["get", "amber"], 0], HEX.review, HEX.ok],
         } });
       map.addLayer({ id: "cluster-count", type: "symbol", source: "units", filter: ["has", "point_count"],

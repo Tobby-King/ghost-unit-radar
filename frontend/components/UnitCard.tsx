@@ -24,7 +24,7 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
   if (!u) {
     return (
       <div className="p-5 text-sm text-muted" aria-busy={loading}>
-        {loading ? <div className="space-y-3"><div className="h-4 w-24 animate-pulse rounded bg-raised" /><div className="h-6 w-3/4 animate-pulse rounded bg-raised" /><div className="h-24 animate-pulse rounded bg-raised" /></div> : "Unit not found."}
+        {loading ? "Loading unit…" : "Unit not found."}
       </div>
     );
   }
@@ -45,92 +45,89 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
   };
 
   return (
-    <article className="flex min-h-full flex-col" aria-labelledby="unit-name">
-      <div className="space-y-3 border-b border-line p-5">
-        <div className="flex items-start justify-between gap-3">
-          <span className="font-mono text-xs text-muted">{u.uid}</span>
-          <button type="button" onClick={onClose} className="-m-1 grid h-8 w-8 place-items-center rounded-chip text-muted hover:bg-raised hover:text-ink" aria-label="Close unit card">
-            <svg viewBox="0 0 20 20" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8"><path d="m5 5 10 10M15 5 5 15" /></svg>
-          </button>
+    <article className="flex min-h-full flex-col text-[14px]" aria-labelledby="unit-name">
+      <header className="px-5 pb-5 pt-4">
+        <div className="flex items-center justify-between gap-3 text-[13px] text-muted">
+          <span>Polling unit <span className="font-mono">{u.uid}</span></span>
+          <button type="button" onClick={onClose} className="-mr-1 px-1 text-muted hover:text-ink" aria-label="Close unit card">Close ✕</button>
         </div>
-        <h2 id="unit-name" className="text-[19px] leading-snug">{titleCase(u.name)}</h2>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[13px]">
-          <dt className="text-muted">Ward</dt><dd>{titleCase(u.ward)}</dd>
-          <dt className="text-muted">LGA</dt><dd>{titleCase(u.lga)}</dd>
-          <dt className="text-muted">State</dt><dd>{stateName(u.state)}</dd>
-        </dl>
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        <h2 id="unit-name" className="mt-3 text-[22px] leading-tight">{titleCase(u.name)}</h2>
+        <p className="mt-1.5 text-muted">
+          {titleCase(u.ward)} ward, {titleCase(u.lga)} LGA, {stateName(u.state)}
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
           <StatusPill band={u.band} size="lg" />
-          <span className="font-mono text-sm text-muted">plausibility <span className="text-ink">{u.score}</span>/100</span>
+          <span className="text-[13px] text-muted">Plausibility score {u.score} of 100</span>
         </div>
-      </div>
+      </header>
 
-      <section className="space-y-3 border-b border-line p-5" aria-labelledby="why">
-        <h3 id="why" className="label !mb-0">Why it was flagged</h3>
+      <section className="border-t border-line px-5 py-5" aria-labelledby="why">
+        <h3 id="why" className="font-sans text-[15px] font-semibold">Why it was flagged</h3>
         {reasons.length === 0 && !clockHit ? (
-          <p className="text-sm text-muted">
-            {u.band === 3 ? "INEC published no coordinate for this unit, so its location cannot be checked." : "Nothing unusual found: inside its listed state and not stacked with other units."}
+          <p className="mt-2 text-muted">
+            {u.band === 3 ? "INEC published no coordinate for this unit, so its location cannot be checked." : "Nothing unusual: the unit sits inside its listed state and is not stacked with others."}
           </p>
         ) : (
-          <ul className="space-y-3">
-            {reasons.map((r) => (
-              <li key={r.code} className="rounded-chip border border-line bg-bg/60 p-3">
-                <div className="mb-1.5"><SourceTag source={r.source} /></div>
-                <p className="text-sm leading-relaxed">{plainReason(r, u, centroids)}</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted">Possible innocent explanation: {r.innocent}</p>
+          <ol className="mt-3 space-y-4">
+            {reasons.map((r, k) => (
+              <li key={r.code} className="grid grid-cols-[18px_1fr] gap-x-2">
+                <span className="text-muted">{k + 1}.</span>
+                <div>
+                  <p className="leading-relaxed">{plainReason(r, u, centroids)}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                    Could be innocent: {r.innocent.charAt(0).toLowerCase() + r.innocent.slice(1)} <SourceTag source={r.source} />
+                  </p>
+                </div>
               </li>
             ))}
-          </ul>
+          </ol>
         )}
         {u.lat != null && (
-          <p className="font-mono text-xs text-muted">Official coordinate {u.lat.toFixed(5)}, {u.lon!.toFixed(5)}</p>
+          <p className="mt-4 text-[13px] text-muted">Published coordinate <span className="font-mono">{u.lat.toFixed(5)}, {u.lon!.toFixed(5)}</span></p>
         )}
       </section>
 
       {clock && (
-        <section className="space-y-2 border-b border-line p-5" aria-labelledby="clock">
-          <div className="flex items-center justify-between">
-            <h3 id="clock" className="label !mb-0">Clock audit</h3>
-            <SourceTag source="SYNTHETIC" />
-          </div>
-          <p className={`rounded-chip border p-3 text-sm leading-relaxed ${clockHit ? "border-field/40 bg-field/5" : "border-line"}`}>
-            <span className="font-mono">{clock.text}</span>{" "}
-            <span className={clock.flagged ? (clock.secs < fastest ? "font-medium text-field" : "font-medium text-review") : "text-muted"}>
-              ({clock.verdict})
-            </span>
+        <section className="border-t border-line px-5 py-5" aria-labelledby="clock">
+          <h3 id="clock" className="font-sans text-[15px] font-semibold">Clock audit <SourceTag source="SYNTHETIC" /></h3>
+          <p className="mt-2 leading-relaxed">
+            {clock.text}
+            {clock.flagged ? (
+              <span className={`font-semibold ${clock.secs < fastest ? "text-field" : "text-review"}`}> — {clock.verdict}.</span>
+            ) : <span className="text-muted"> — {clock.verdict}.</span>}
           </p>
-          <p className="text-xs text-muted">
-            At {spv} s per voter, {u.devices} device{u.devices === 1 ? "" : "s"} can accredit at most <span className="font-mono">{fmt(maxAccredited(hours, spv, u.devices!))}</span> in {hours} h.
+          <p className="mt-1.5 text-[13px] text-muted">
+            At {spv} seconds per voter, {u.devices} device{u.devices === 1 ? "" : "s"} can accredit at most {fmt(maxAccredited(hours, spv, u.devices!))} voters in {hours} hours.
           </p>
         </section>
       )}
 
-      <section className="border-b border-line p-5" aria-labelledby="numbers">
-        <h3 id="numbers" className="label">Numbers</h3>
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-chip border border-line bg-line font-mono">
-          <Stat label="Registered" note="synthetic" value={fmt(u.register)} />
-          <Stat label={`Adults within ${radius} km`} note="WorldPop" value={u.adults_r == null ? "–" : `~${fmt(u.adults_r)}`} />
-          <Stat label="Adults this unit serves" note={u.units_r ? `shared by ${fmt(u.units_r)} units` : "estimate"} value={u.adults_share == null ? "–" : `~${fmt(u.adults_share)}`} />
-          <Stat label="Register ÷ adults" note="ratio" value={ratio == null ? "–" : `${ratio.toFixed(1)}×`} warn={ratio != null && ratio > 1.2} />
-          <Stat label="Buildings nearby" note="Open Buildings" value="pending" muted />
-          <Stat label="Accredited" note="synthetic" value={fmt(u.accredited)} />
-        </dl>
+      <section className="border-t border-line px-5 py-5" aria-labelledby="numbers">
+        <h3 id="numbers" className="font-sans text-[15px] font-semibold">The figures</h3>
+        <table className="mt-2 w-full">
+          <tbody className="[&_td]:py-1.5 [&_tr]:border-b [&_tr]:border-dotted [&_tr]:border-line">
+            <Fig label="Registered voters" note="synthetic" value={fmt(u.register)} />
+            <Fig label="Accredited voters" note="synthetic" value={fmt(u.accredited)} />
+            <Fig label={`Adults living within ${radius} km`} note="WorldPop" value={u.adults_r == null ? "–" : `about ${fmt(u.adults_r)}`} />
+            <Fig label="Adults this unit plausibly serves" note={u.units_r ? `shared by ${fmt(u.units_r)} units` : ""} value={u.adults_share == null ? "–" : `about ${fmt(u.adults_share)}`} />
+            <Fig label="Register ÷ adults served" value={ratio == null ? "–" : `${ratio.toFixed(1)}×`} strong={ratio != null && ratio > 1.2} />
+            <Fig label="Buildings nearby" note="Open Buildings" value="not loaded yet" muted />
+          </tbody>
+        </table>
         {u.lat != null && u.adults_r == null && (
-          <p className="mt-2 text-xs leading-relaxed text-muted">
-            Catchment not computed: the coordinate is outside Nigeria, in another state or a stacked centre point, so it does not show where the unit really is.
+          <p className="mt-3 text-[13px] leading-relaxed text-muted">
+            No catchment estimate: the coordinate is abroad, in another state or a shared centre point, so it does not show where the unit really is.
           </p>
         )}
       </section>
 
-      <div className="space-y-2 p-5">
-        <button type="button" onClick={onToggleList} className={inList ? "btn-ghost w-full" : "btn-primary w-full"} aria-pressed={inList}>
-          {inList ? `✓ On field-verification list (${listSize})` : "Add to field-verification list"}
+      <div className="flex gap-2 border-t border-line px-5 py-4">
+        <button type="button" onClick={onToggleList} className={inList ? "btn-ghost flex-1" : "btn-primary flex-1"} aria-pressed={inList}>
+          {inList ? `On your list (${listSize})` : "Add to field-verification list"}
         </button>
-        <button type="button" onClick={copy} className="btn-ghost w-full" aria-live="polite">
-          {copied ? "Copied" : "Copy unit details"}
-        </button>
+        <button type="button" onClick={copy} className="btn-ghost" aria-live="polite">{copied ? "Copied" : "Copy details"}</button>
       </div>
-      <p className="mt-auto border-t border-line px-5 py-4 text-xs leading-relaxed text-muted">
+      <p className="mt-auto px-5 pb-5 text-[13px] leading-relaxed text-muted">
         A flag means this unit needs field verification. It is not evidence of wrongdoing.
         <span className="sr-only"> Status: {STATUS[u.band].label}.</span>
       </p>
@@ -138,11 +135,11 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
   );
 }
 
-function Stat({ label, note, value, warn, muted }: { label: string; note: string; value: string; warn?: boolean; muted?: boolean }) {
+function Fig({ label, note, value, strong, muted }: { label: string; note?: string; value: string; strong?: boolean; muted?: boolean }) {
   return (
-    <div className="bg-surface px-3 py-2.5">
-      <dt className="font-sans text-[11px] leading-tight text-muted">{label} <span className="opacity-70">· {note}</span></dt>
-      <dd className={`mt-1 text-[17px] ${warn ? "text-field" : muted ? "text-muted text-sm" : "text-ink"}`}>{value}</dd>
-    </div>
+    <tr>
+      <td className="pr-3 text-muted">{label}{note ? <span className="text-[12px] italic"> ({note})</span> : null}</td>
+      <td className={`whitespace-nowrap text-right tabular-nums ${strong ? "font-semibold text-field" : muted ? "text-muted" : ""}`}>{value}</td>
+    </tr>
   );
 }

@@ -37,10 +37,10 @@ export default function MethodsView() {
         </nav>
 
         <article className="max-w-prose text-[16px] leading-[1.7] [&_h2]:mt-14 [&_h2]:scroll-mt-6 [&_h2]:text-2xl [&_h3]:mt-8 [&_h3]:text-lg [&_p]:mt-4">
-          <p className="label">Methods &amp; Ethics</p>
+          <p className="text-[13px] text-muted">Methods and ethics</p>
           <h1 className="text-3xl leading-tight md:text-4xl">How Ghost Unit Radar decides a polling unit needs a field check</h1>
 
-          <div className="mt-6 grid gap-3 rounded-panel border border-line bg-surface p-5 text-sm sm:grid-cols-3" role="note">
+          <div className="mt-6 grid gap-3 rounded-[6px] border border-line bg-surface p-5 text-sm sm:grid-cols-3" role="note">
             <Notice title="Synthetic registers" tone="text-review">
               Every registered-voter and result-sheet number is generated for this demo and labelled <b>SYNTHETIC</b> wherever it appears.
             </Notice>
@@ -163,11 +163,11 @@ export default function MethodsView() {
 
           <h2 id="sources">Data sources and licences</h2>
           <Table head={["Data", "Use", "Licence"]} rows={[
-            [<a key="a" className="text-accent-ink hover:underline" href="https://github.com/mykeels/inec-polling-units" target="_blank" rel="noopener">mykeels/inec-polling-units</a>, "176,623 units scraped from INEC’s public site (2022): names, wards, LGAs, coordinates", "MIT"],
-            [<a key="b" className="text-accent-ink hover:underline" href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoBoundaries gbOpen NGA ADM1</a>, "State boundaries (simplified)", "CC BY 4.0"],
-            [<a key="c" className="text-accent-ink hover:underline" href="https://www.worldpop.org" target="_blank" rel="noopener">WorldPop 1 km population 2020</a>, "Population density", "CC BY 4.0"],
+            [<a key="a" className="underline underline-offset-2 hover:text-muted" href="https://github.com/mykeels/inec-polling-units" target="_blank" rel="noopener">mykeels/inec-polling-units</a>, "176,623 units scraped from INEC’s public site (2022): names, wards, LGAs, coordinates", "MIT"],
+            [<a key="b" className="underline underline-offset-2 hover:text-muted" href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoBoundaries gbOpen NGA ADM1</a>, "State boundaries (simplified)", "CC BY 4.0"],
+            [<a key="c" className="underline underline-offset-2 hover:text-muted" href="https://www.worldpop.org" target="_blank" rel="noopener">WorldPop 1 km population 2020</a>, "Population density", "CC BY 4.0"],
             ["Google Open Buildings 2.5D Temporal (optional, via Earth Engine)", "Rooftops per year 2016–2023 (pending)", "CC BY 4.0 / ODbL"],
-            [<a key="d" className="text-accent-ink hover:underline" href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>, "Basemap tiles (OpenMapTiles schema, © OpenStreetMap contributors)", "Free, no key · data ODbL"],
+            [<a key="d" className="underline underline-offset-2 hover:text-muted" href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>, "Basemap tiles (OpenMapTiles schema, © OpenStreetMap contributors)", "Free, no key · data ODbL"],
             ["IBM Plex Sans / Mono, Space Grotesk", "Typefaces (Google Fonts)", "SIL Open Font License"],
           ]} />
 
@@ -194,12 +194,12 @@ export default function MethodsView() {
           <h2 id="contact">Contact</h2>
           <p>
             Built by Oluwatobi Olatunji for the AI4Elections Hackathon 2026. Code, pipeline and issue tracker:{" "}
-            <a className="text-accent-ink hover:underline" href={REPO} target="_blank" rel="noopener">github.com/Tobby-King/ghost-unit-radar</a>.
+            <a className="underline underline-offset-2 hover:text-muted" href={REPO} target="_blank" rel="noopener">github.com/Tobby-King/ghost-unit-radar</a>.
             To report a correction or a data problem, please{" "}
-            <a className="text-accent-ink hover:underline" href={`${REPO}/issues`} target="_blank" rel="noopener">open an issue</a>.
+            <a className="underline underline-offset-2 hover:text-muted" href={`${REPO}/issues`} target="_blank" rel="noopener">open an issue</a>.
           </p>
           <p className="mb-16 text-sm text-muted">
-            <Link href="/" className="text-accent-ink hover:underline">← Back to the map</Link>
+            <Link href="/" className="underline underline-offset-2 hover:text-muted">← Back to the map</Link>
           </p>
         </article>
       </div>
@@ -219,19 +219,19 @@ function Status({ i, c, children }: { i: string; c: string; children: React.Reac
   return <span className="whitespace-nowrap"><span aria-hidden="true" className={`${c} text-xs`}>{i}</span> <b>{children}</b></span>;
 }
 function Li({ t, children }: { t: string; children: React.ReactNode }) {
-  return <li className="border-l-2 border-accent/50 pl-4"><b>{t}</b> <span className="text-muted">{children}</span></li>;
+  return <li className="border-l-2 border-line pl-4"><b>{t}</b> <span className="text-muted">{children}</span></li>;
 }
 function Table({ head, rows, numeric }: { head: string[]; rows: React.ReactNode[][]; numeric?: boolean }) {
   return (
-    <div className="mt-5 overflow-x-auto rounded-panel border border-line">
+    <div className="mt-5 overflow-x-auto rounded-[6px] border border-line">
       <table className="w-full text-sm">
-        <thead className="bg-surface text-left text-[11px] uppercase tracking-[0.08em] text-muted">
+        <thead className="bg-surface text-left text-[13px] text-muted">
           <tr>{head.map((h, k) => <th key={h} scope="col" className={`px-3 py-2.5 font-medium ${numeric && k > 0 ? "text-right" : ""}`}>{h}</th>)}</tr>
         </thead>
         <tbody>
           {rows.length === 0 ? <tr><td className="px-3 py-3 text-muted" colSpan={head.length}>Loading…</td></tr> : rows.map((r, k) => (
             <tr key={k} className="border-t border-line align-top">
-              {r.map((c, j) => <td key={j} className={`px-3 py-2.5 leading-snug ${numeric && j > 0 ? "text-right font-mono" : ""}`}>{c}</td>)}
+              {r.map((c, j) => <td key={j} className={`px-3 py-2.5 leading-snug ${numeric && j > 0 ? "text-right tabular-nums" : ""}`}>{c}</td>)}
             </tr>
           ))}
         </tbody>
@@ -241,7 +241,7 @@ function Table({ head, rows, numeric }: { head: string[]; rows: React.ReactNode[
 }
 function Figure({ caption, children }: { caption: string; children: React.ReactNode }) {
   return (
-    <figure className="mt-4 rounded-panel border border-line bg-surface p-4">
+    <figure className="mt-4 rounded-[6px] border border-line bg-surface p-4">
       {children}
       <figcaption className="mt-2 text-xs text-muted">{caption}</figcaption>
     </figure>

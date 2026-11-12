@@ -49,7 +49,7 @@ export default function FindingsView() {
 
   const SortBtn = ({ k, children }: { k: SortKey; children: React.ReactNode }) => (
     <button type="button" className="inline-flex items-center gap-1 hover:text-ink" onClick={() => setSort((s) => ({ key: k, dir: s.key === k ? (-s.dir as 1 | -1) : 1 }))}>
-      {children}<span aria-hidden="true" className={sort.key === k ? "text-accent-ink" : "opacity-30"}>{sort.key === k && sort.dir === -1 ? "↓" : "↑"}</span>
+      {children}<span aria-hidden="true" className={sort.key === k ? "text-ink" : "opacity-30"}>{sort.key === k && sort.dir === -1 ? "↓" : "↑"}</span>
     </button>
   );
   const ariaSort = (k: SortKey) => (sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none");
@@ -60,7 +60,7 @@ export default function FindingsView() {
       <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-12">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="label">Report · location integrity and plausibility</p>
+            <p className="text-[13px] text-muted">Report · data as published by INEC, 2022</p>
             <h1 className="text-3xl md:text-4xl">Findings</h1>
             <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted">
               Location findings use the real public INEC polling-unit list (2022). Register and result-sheet numbers are synthetic.
@@ -75,11 +75,11 @@ export default function FindingsView() {
 
         {error && <p className="mt-6 text-field">Could not load data: {error}</p>}
 
-        <section aria-label="Headline numbers" className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-line bg-line md:grid-cols-3 lg:grid-cols-6">
+        <section aria-label="Headline numbers" className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-[6px] border border-line bg-line md:grid-cols-3 lg:grid-cols-6">
           {(head.length ? head : Array.from({ length: 6 }, (): (typeof head)[number] => ({ label: "…", value: undefined }))).map((h, k) => (
             <div key={k} className="bg-surface p-4">
-              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">{h.label}</p>
-              <p className="mt-2 font-mono text-2xl leading-none">{fmt(h.value)}</p>
+              <p className="text-[13px] text-muted">{h.label}</p>
+              <p className="mt-1 font-display text-[28px] leading-none tabular-nums">{fmt(h.value)}</p>
               {h.note && <p className="mt-1.5 truncate text-xs text-muted">{h.note}</p>}
             </div>
           ))}
@@ -91,10 +91,10 @@ export default function FindingsView() {
               <h2 id="by-state" className="text-xl">Location problems by state</h2>
               <p className="mt-1 text-sm text-muted">{MEASURES.find((m) => m.key === measure)?.note}. Real data.</p>
             </div>
-            <div role="radiogroup" aria-label="Measure" className="flex flex-wrap gap-1 rounded-panel border border-line bg-surface p-1">
+            <div role="radiogroup" aria-label="Measure" className="flex flex-wrap gap-1 rounded-[6px] border border-line bg-surface p-1">
               {MEASURES.map((m) => (
                 <button key={m.key} type="button" role="radio" aria-checked={measure === m.key} onClick={() => setMeasure(m.key)}
-                  className={`rounded-chip px-2.5 py-1.5 text-xs ${measure === m.key ? "bg-accent text-[#0B1220]" : "text-muted hover:text-ink"}`}>
+                  className={`rounded-chip px-2.5 py-1.5 text-xs ${measure === m.key ? "bg-ink text-bg" : "text-muted hover:text-ink"}`}>
                   {m.label}
                 </button>
               ))}
@@ -111,9 +111,9 @@ export default function FindingsView() {
                       aria-label={`${titleCase(b.state)}: ${fmt(v)}`}>
                       <span className="truncate text-muted">{titleCase(b.state)}</span>
                       <span className="flex h-3 items-center">
-                        <span className={`h-3 rounded-r-[4px] ${hover === b.state ? "bg-accent" : "bg-accent/70"}`} style={{ width: v ? `${Math.max(0.6, (v / max) * 100)}%` : 0 }} />
+                        <span className={`h-3 rounded-r-[4px] ${hover === b.state ? "bg-ink" : "bg-ink/55"}`} style={{ width: v ? `${Math.max(0.6, (v / max) * 100)}%` : 0 }} />
                       </span>
-                      <span className="text-right font-mono text-ink">{fmt(v)}</span>
+                      <span className="text-right tabular-nums text-ink">{fmt(v)}</span>
                     </button>
                   </li>
                 );
@@ -121,7 +121,7 @@ export default function FindingsView() {
             </ol>
             {focus && (
               <aside className="panel h-fit p-4 lg:sticky lg:top-6" aria-live="polite">
-                <p className="label">State detail</p>
+                
                 <p className="font-display text-lg">{titleCase(focus.state)}</p>
                 <dl className="mt-3 space-y-1.5 text-sm">
                   <Row k="Polling units" v={focus.units} />
@@ -140,7 +140,7 @@ export default function FindingsView() {
           <p className="mt-1 text-sm text-muted">Ranked by plausibility score (lowest first). Click a unit to open it on the map.</p>
           <div className="panel mt-5 overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-line text-left text-[11px] uppercase tracking-[0.08em] text-muted">
+              <thead className="border-b border-line text-left text-[13px] text-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium" aria-sort={ariaSort("score")}><SortBtn k="score">#</SortBtn></th>
                   <th scope="col" className="px-4 py-3 font-medium" aria-sort={ariaSort("name")}><SortBtn k="name">Polling unit</SortBtn></th>
@@ -153,13 +153,13 @@ export default function FindingsView() {
               <tbody>
                 {rows.map((u) => (
                   <tr key={u.uid} className="border-b border-line align-top last:border-0 hover:bg-raised/50">
-                    <td className="px-4 py-3 font-mono text-muted">{u.rank}</td>
+                    <td className="px-4 py-3 tabular-nums text-muted">{u.rank}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/#${u.uid}`} className="font-medium hover:text-accent-ink hover:underline">{titleCase(u.name)}</Link>
+                      <Link href={`/#${u.uid}`} className="font-medium hover:underline underline-offset-2 hover:text-muted">{titleCase(u.name)}</Link>
                       <div className="font-mono text-xs text-muted">{u.uid}</div>
                     </td>
                     <td className="px-4 py-3">{titleCase(u.state)}<div className="text-xs text-muted">{titleCase(u.lga)}</div></td>
-                    <td className="px-4 py-3 font-mono">{u.score}</td>
+                    <td className="px-4 py-3 tabular-nums">{u.score}</td>
                     <td className="px-4 py-3"><StatusPill band={BAND_FROM_NAME[u.band] ?? 3} /></td>
                     <td className="px-4 py-3">
                       <ul className="space-y-1">
@@ -177,7 +177,7 @@ export default function FindingsView() {
 
         <footer className="mt-12 border-t border-line pt-6 text-xs leading-relaxed text-muted">
           A flag means a unit needs field verification. It is not evidence of wrongdoing. No INEC system was accessed: only static public files were used.
-          See <Link href="/methods/" className="text-accent-ink hover:underline">Methods &amp; Ethics</Link>.
+          See <Link href="/methods/" className="underline underline-offset-2 hover:text-muted">Methods &amp; Ethics</Link>.
         </footer>
       </main>
     </div>
@@ -188,7 +188,7 @@ function Row({ k, v, strong }: { k: string; v: number; strong?: boolean }) {
   return (
     <div className="flex justify-between gap-3">
       <dt className={strong ? "text-ink" : "text-muted"}>{k}</dt>
-      <dd className={`font-mono ${strong ? "text-accent-ink" : ""}`}>{fmt(v)}</dd>
+      <dd className={`tabular-nums ${strong ? "font-semibold" : ""}`}>{fmt(v)}</dd>
     </div>
   );
 }

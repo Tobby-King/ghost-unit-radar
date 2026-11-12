@@ -24,7 +24,7 @@ export default {
       fontFamily: {
         sans: ['"IBM Plex Sans"', "system-ui", "sans-serif"],
         mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
-        display: ['"Space Grotesk"', '"IBM Plex Sans"', "sans-serif"],
+        display: ['"Source Serif 4"', "Georgia", "serif"],
       },
       borderRadius: { panel: "10px", chip: "6px" },
       maxWidth: { prose: "70ch" },

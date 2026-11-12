@@ -5,14 +5,14 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import {
   FLAG_BITS, STATUS, clockFlag, fmt, getJSON, inNigeriaBox, indexToUid, loadUnit, titleCase, uidToIndex,
-  type SearchIndex, type Showcase, type Summary, type UnitDetail, type UnitIndex,
+  type Band, type SearchIndex, type Showcase, type Summary, type UnitDetail, type UnitIndex,
 } from "@/lib/data";
 import FilterPanel, { DEFAULT_FILTERS, type Counts, type Filters } from "./FilterPanel";
 import type { PointProps, RadarMapHandle } from "./RadarMap";
 import Sheet from "./Sheet";
 import SummaryStrip from "./SummaryStrip";
 import UnitCard from "./UnitCard";
-import { Logo, TopBar, usePrefersReducedMotion } from "./ui";
+import { Logo, StatusMark, TopBar, usePrefersReducedMotion } from "./ui";
 
 const RadarMap = dynamic(() => import("./RadarMap"), { ssr: false });
 const DRAWER = 380;
@@ -250,17 +250,16 @@ export default function MapApp() {
     <div className="flex h-dvh flex-col overflow-hidden">
       {!presenting && (
         <TopBar active="/">
-          <button type="button" onClick={togglePresent} className="hidden h-8 items-center gap-1.5 rounded-chip border border-line px-2.5 text-xs text-muted hover:text-ink md:inline-flex"
-            title="Presentation mode (P)" aria-keyshortcuts="P">
-            <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="2.5" y="3.5" width="15" height="10" rx="1.5" /><path d="M10 13.5V17M7 17h6" /></svg>
-            Present <kbd className="font-mono text-[10px] opacity-70">P</kbd>
+          <button type="button" onClick={togglePresent} className="hidden text-[14px] text-muted hover:text-ink md:inline"
+            title="Presentation mode (keyboard: P)" aria-keyshortcuts="P">
+            Present
           </button>
         </TopBar>
       )}
 
       <div className="relative flex min-h-0 flex-1">
         {!presenting && !isMobile && (
-          <aside className="w-[320px] shrink-0 overflow-y-auto border-r border-line bg-surface" aria-label="Search and filters">{panel}</aside>
+          <aside className="w-[320px] shrink-0 overflow-y-auto border-r border-line bg-bg" aria-label="Search and filters">{panel}</aside>
         )}
 
         <main className="relative min-w-0 flex-1 overflow-hidden">
@@ -281,59 +280,57 @@ export default function MapApp() {
           )}
 
           {presenting && (
-            <div className="absolute left-4 top-4 z-10 flex items-center gap-3 rounded-panel border border-line bg-surface/90 px-3 py-2 backdrop-blur">
+            <div className="absolute left-4 top-4 z-10 flex items-center gap-3 border border-line bg-bg px-3 py-2">
               <Logo />
               <span className="font-display text-lg">Ghost Unit Radar</span>
-              <span className="rounded-chip border border-review/50 bg-review/10 px-2 py-0.5 font-mono text-[10.5px] tracking-[0.08em] text-review">SYNTHETIC REGISTERS · DEMO</span>
+              <span className="flex items-center gap-1.5 text-[13px] text-muted"><span className="inline-block h-2 w-2 bg-review" aria-hidden="true" />Demo: voter registers are synthetic</span>
             </div>
           )}
 
           {intro && summary && !presenting && (
-            <section className="absolute left-3 right-3 top-[68px] z-10 max-w-[380px] md:left-4 md:top-4 rounded-panel border border-line bg-surface/95 p-5 backdrop-blur md:right-auto" aria-labelledby="intro-h">
-              <p className="label !mb-2">Polling-unit plausibility check</p>
-              <h1 id="intro-h" className="text-[22px] leading-tight">
-                <span className="font-mono font-medium">{fmt(summary.national.units)}</span> polling units.{" "}
-                <span className="font-mono font-medium">{fmt(summary.national.with_coordinates)}</span> have published locations.{" "}
-                <span className="text-accent-ink">We checked every one.</span>
+            <section className="absolute left-3 right-3 top-[64px] z-10 max-w-[400px] border border-line bg-bg p-5 md:left-4 md:right-auto md:top-4" aria-labelledby="intro-h">
+              <p className="text-[13px] text-muted">INEC polling-unit list, 2022 · checked against public map data</p>
+              <h1 id="intro-h" className="mt-2 text-[24px] leading-[1.2]">
+                Of {fmt(summary.national.units)} polling units, {fmt(summary.national.outside_nigeria)} are placed outside Nigeria.
               </h1>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                Units whose location or numbers look physically implausible are marked for field verification. A flag is not evidence of wrongdoing.
+              <p className="mt-3 leading-relaxed text-ink/85">
+                One Kogi State primary school is mapped to Waterloo, Canada. This map checks all {fmt(summary.national.with_coordinates)} published
+                locations, and the population around them, so field teams know where to look first.
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" className="btn-primary" onClick={strangest} disabled={!mapReady}>Show me the strangest one</button>
-                <button type="button" className="btn-ghost" onClick={() => setIntro(false)}>Explore the map</button>
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <button type="button" className="btn-primary" onClick={strangest} disabled={!mapReady}>Show the school in Canada</button>
+                <button type="button" className="text-[14px] text-muted underline underline-offset-2 hover:text-ink" onClick={() => setIntro(false)}>Explore the map</button>
               </div>
-              <p className="mt-3 hidden text-xs text-muted md:block">Press <kbd className="rounded border border-line px-1 font-mono">P</kbd> for presentation mode.</p>
             </section>
           )}
 
           {!presenting && !isMobile && idx && (
-            <div className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-panel border border-line bg-surface/90 px-3 py-2 text-xs backdrop-blur" aria-label="Map legend">
+            <div className="pointer-events-none absolute bottom-3 left-3 z-10 max-w-[380px] border border-line bg-bg px-3 py-2 text-[12px]" aria-label="Map legend">
               <ul className="flex flex-wrap gap-x-3 gap-y-1">
                 {STATUS.slice(0, 3).map((s, b) => (
-                  <li key={s.key} className="flex items-center gap-1.5"><span aria-hidden="true" className={["text-ok", "text-review", "text-field"][b]}>{s.icon}</span>{s.label}</li>
+                  <li key={s.key} className="flex items-center gap-1.5"><StatusMark band={b as Band} />{s.label}</li>
                 ))}
               </ul>
-              <p className="mt-1 text-muted">Cluster ring = most serious status inside · <span className="text-field">- - -</span> link to the state it claims</p>
+              <p className="mt-1 text-muted">Circles group nearby units; their outline shows the most serious status inside. Dashed lines join a misplaced unit to its state.</p>
             </div>
           )}
 
           {isMobile && idx && !presenting && (
             <div className="absolute inset-x-3 top-3 z-10 flex gap-2">
-              <button type="button" className="flex flex-1 items-center gap-2 rounded-panel border border-line bg-surface/95 px-3 py-2.5 text-left text-sm backdrop-blur"
+              <button type="button" className="flex flex-1 items-center gap-2 rounded-[4px] border border-line bg-bg px-3 py-2.5 text-left text-sm"
                 onClick={() => { setMobileFilters(true); setIntro(false); }}>
                 <svg viewBox="0 0 20 20" className="h-4 w-4 text-muted" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="9" cy="9" r="5.5" /><path d="m13.5 13.5 3.5 3.5" /></svg>
-                <span className="flex-1 truncate text-muted">{filters.q || "Search & filters"}</span>
-                <span className="font-mono text-xs text-ink">{fmt(result?.counts.matched)}</span>
+                <span className="flex-1 truncate text-muted">{filters.q || "Search and filter"}</span>
+                <span className="tabular-nums text-xs text-muted">{fmt(result?.counts.matched)} units</span>
               </button>
             </div>
           )}
 
           {presenting && showcase.length > 0 && (
             <div className="absolute bottom-5 left-4 z-20 flex justify-center" style={{ right: (cardOpen ? DRAWER : 0) + 16 }}>
-              <div className="flex w-full max-w-[760px] items-center gap-3 rounded-panel border border-line bg-surface/95 p-3 backdrop-blur" role="group" aria-label="Presentation controls">
-              <span className="font-mono text-sm text-muted">{step + 1}/{showcase.length}</span>
-              <p className="flex-1 text-[15px] leading-snug">{showcase[step]?.caption}</p>
+              <div className="flex w-full max-w-[760px] items-center gap-4 border border-line bg-bg px-4 py-3" role="group" aria-label="Presentation controls">
+              <span className="tabular-nums text-sm text-muted">{step + 1} of {showcase.length}</span>
+              <p className="flex-1 font-display text-[17px] leading-snug">{showcase[step]?.caption}</p>
               <div className="flex gap-1.5">
                 <button type="button" className="btn-ghost !px-2.5" onClick={() => goStep(Math.max(0, step - 1))} disabled={step === 0} aria-label="Previous unit">←</button>
                 <button type="button" className="btn-primary !px-2.5" onClick={() => goStep(Math.min(showcase.length - 1, step + 1))} disabled={step === showcase.length - 1} aria-label="Next unit">→</button>
@@ -345,7 +342,7 @@ export default function MapApp() {
 
           {!isMobile && (
             <aside aria-label="Unit card" aria-hidden={!cardOpen}
-              className={`absolute bottom-0 right-0 top-0 z-20 w-[380px] overflow-y-auto border-l border-line bg-surface transition-transform duration-300 ease-out ${cardOpen ? "translate-x-0" : "pointer-events-none translate-x-full"}`}>
+              className={`absolute bottom-0 right-0 top-0 z-20 w-[380px] overflow-y-auto border-l border-line bg-bg transition-transform duration-300 ease-out ${cardOpen ? "translate-x-0" : "pointer-events-none translate-x-full"}`}>
               {cardOpen && card}
             </aside>
           )}

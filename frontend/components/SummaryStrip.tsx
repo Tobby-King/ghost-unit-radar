@@ -2,60 +2,38 @@
 
 import { fmt, titleCase, type Summary } from "@/lib/data";
 
-type Bar = { label: string; value: number };
-interface Tile { key: string; title: string; value: number; sub: string; bars: Bar[]; tone: string; onClick: () => void; meter?: number }
+type Key = "all" | "outside" | "stacked" | "field";
 
-/** Four headline tiles. Each mini chart is a single-hue bar list (one series → no legend);
- *  every bar has a hover title with its exact value, and the headline number is always text. */
-export default function SummaryStrip({ summary, onPick }: { summary: Summary; onPick: (key: "all" | "outside" | "stacked" | "field") => void }) {
+/** Four headline figures, each followed by one specific fact rather than decoration. */
+export default function SummaryStrip({ summary, onPick }: { summary: Summary; onPick: (key: Key) => void }) {
   const n = summary.national;
-  const topStates = (field: string) =>
-    Object.entries(summary.states).map(([s, v]) => ({ label: titleCase(s), value: v[field] || 0 }))
-      .sort((a, b) => b.value - a.value).slice(0, 5);
-  const tiles: Tile[] = [
-    { key: "all", title: "Units checked", value: n.with_coordinates, tone: "text-accent-ink",
-      sub: `of ${fmt(n.units)} have a published location`, bars: [], meter: n.with_coordinates / n.units, onClick: () => onPick("all") },
-    { key: "outside", title: "Outside Nigeria", value: n.outside_nigeria, tone: "text-field",
-      sub: "top landing places", bars: n.top_foreign_places.slice(0, 5).map(([label, value]) => ({ label, value })), onClick: () => onPick("outside") },
-    { key: "stacked", title: "Stacked on one point", value: n.stacked_units, tone: "text-review",
-      sub: `on ${fmt(n.stacked_points)} points · top states`, bars: topStates("STACKED"), onClick: () => onPick("stacked") },
-    { key: "field", title: "Need field check", value: n.red, tone: "text-field",
-      sub: "◆ field check · top states", bars: topStates("red"), onClick: () => onPick("field") },
+  const places = n.top_foreign_places.slice(0, 3).map(([p, c]) => `${p.split(",")[0]} (${fmt(c)})`);
+  const ls = n.largest_stack;
+  const items: { key: Key; value: number; title: string; fact: string; tone?: string }[] = [
+    { key: "all", value: n.with_coordinates, title: "units checked",
+      fact: `${Math.round((n.with_coordinates / n.units) * 100)}% of the ${fmt(n.units)} on INEC’s list have a published location.` },
+    { key: "outside", value: n.outside_nigeria, title: "placed outside Nigeria", tone: "text-field",
+      fact: `Most land in ${places.slice(0, -1).join(", ")} and ${places[places.length - 1]}.` },
+    { key: "stacked", value: n.stacked_units, title: "stacked on one point",
+      fact: `The largest stack puts ${fmt(ls.size)} units on one spot in ${titleCase(ls.lga)}, ${titleCase(ls.state)}.` },
+    { key: "field", value: n.red, title: "need a field check", tone: "text-field",
+      fact: `Another ${fmt(n.amber)} are marked for review. None of this is evidence of wrongdoing.` },
   ];
   return (
-    <div className="grid grid-cols-2 gap-px border-t border-line bg-line lg:grid-cols-4">
-      {tiles.map((t) => <TileView key={t.key} t={t} />)}
+    <div className="grid grid-cols-2 border-t border-line bg-bg lg:grid-cols-4">
+      {items.map((t, k) => (
+        <button key={t.key} type="button" onClick={() => onPick(t.key)}
+          className={`group px-4 py-3 text-left hover:bg-surface ${k > 0 ? "lg:border-l lg:border-line" : ""} ${k % 2 ? "border-l border-line" : ""}`}
+          aria-label={`${fmt(t.value)} ${t.title}. Show on the map.`}>
+          <p className="flex items-baseline gap-2">
+            <span className={`font-display text-[24px] leading-none tabular-nums ${t.tone ?? ""}`}>{fmt(t.value)}</span>
+            <span className="text-[14px]">{t.title}</span>
+          </p>
+          <p className="mt-1 text-[13px] leading-snug text-muted">
+            {t.fact} <span className="whitespace-nowrap underline-offset-2 group-hover:text-ink group-hover:underline">Show on map</span>
+          </p>
+        </button>
+      ))}
     </div>
-  );
-}
-
-function TileView({ t }: { t: Tile }) {
-  const max = Math.max(1, ...t.bars.map((b) => b.value));
-  return (
-    <button type="button" onClick={t.onClick} className="group flex items-end gap-4 bg-surface px-4 py-3 text-left hover:bg-raised/70"
-      aria-label={`${t.title}: ${fmt(t.value)}. Show on map.`}>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">{t.title}</p>
-        <p className="mt-1 font-mono text-[22px] leading-none text-ink">{fmt(t.value)}</p>
-        <p className="mt-1 truncate text-[11px] text-muted">{t.sub}</p>
-      </div>
-      {t.meter != null ? (
-        <div className="w-24 shrink-0" title={`${(t.meter * 100).toFixed(1)}% have a published location`}>
-          <div className="flex h-2 gap-[2px]">
-            <div className="rounded-l-[4px] bg-accent" style={{ width: `${t.meter * 100}%` }} />
-            <div className="flex-1 rounded-r-[4px] bg-line" />
-          </div>
-          <p className="mt-1 text-right font-mono text-[11px] text-muted">{(t.meter * 100).toFixed(0)}%</p>
-        </div>
-      ) : (
-        <div className="hidden w-28 shrink-0 space-y-[3px] sm:block" aria-hidden="true">
-          {t.bars.map((b) => (
-            <div key={b.label} className="flex items-center gap-1.5" title={`${b.label}: ${fmt(b.value)}`}>
-              <div className="h-[5px] rounded-r-[3px] bg-muted/60 group-hover:bg-accent/80" style={{ width: `${Math.max(4, (b.value / max) * 100)}%` }} />
-            </div>
-          ))}
-        </div>
-      )}
-    </button>
   );
 }
