@@ -65,7 +65,7 @@ def check_unit(u, states_by_norm, states, stacks, cfg):
                 innocent = "Placeholder (0,0)-type coordinate entered instead of a real location."
             reasons.append({
                 "code": "OUTSIDE_NIGERIA", "source": "REAL", "penalty": 70,
-                "text": f"Official coordinate is outside Nigeria - near {place}.",
+                "text": f"Official coordinate is outside Nigeria - {'' if ' km from ' in place or place.startswith('(') else 'near '}{place}.",
                 "innocent": innocent, "place": place,
             })
         else:

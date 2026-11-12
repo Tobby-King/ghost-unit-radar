@@ -6,3 +6,4 @@ data/out/
 .DS_Store
 .vercel
 .env*
+node_modules/

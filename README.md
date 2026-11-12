@@ -56,7 +56,8 @@ pipeline/
   run_pipeline.py      end-to-end run -> data/out/*.csv, *.geojson, web/data/*.json
   sensitivity.py       radius and seconds-per-voter sensitivity
   make_ee_points.py    points for the Earth Engine export
-  tests/test_scoring.py 30 tests
+  tests/test_scoring.py   30 unit tests (scoring, geometry, clock, generator)
+  tests/test_outputs.py   14 integration tests (recompute headline numbers independently)
 earth_engine/catchment_export.js   WorldPop 100 m adults + Open Buildings Temporal counts
 web/                   static site (Leaflet): map, detail cards, filters, CSV download, Methods & Ethics
 scripts/download_data.sh
@@ -67,10 +68,17 @@ scripts/download_data.sh
 ```bash
 ./scripts/download_data.sh                      # ~18 MB of static public files
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q pipeline/tests    # 30 passed
+.venv/bin/python -m pytest -q pipeline/tests    # 44 passed (after the pipeline has run)
 .venv/bin/python pipeline/run_pipeline.py       # all states, ~25 s
 .venv/bin/python pipeline/sensitivity.py        # optional, ~1 min
 cd web && python3 -m http.server 8000           # open http://localhost:8000
+```
+
+Browser end-to-end tests (78 checks: every control, card, filter, download, deep link, mobile, themes),
+using your installed Chrome:
+
+```bash
+cd tests/e2e && npm install && node e2e.mjs http://localhost:8000 /tmp   # or the live URL
 ```
 
 Options: `--radius 2`, `--spv 60`, `--hours 6`, `--demo-state LAGOS`, `--ee data/raw/ee_catchments.csv`.

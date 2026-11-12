@@ -6,3 +6,4 @@ scripts/
 .venv/
 *.py
 requirements.txt
+tests/

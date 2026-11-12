@@ -98,7 +98,7 @@
     const flag = $("flag").value;
     const q = $("q").value.trim().toUpperCase();
     return units.filter((u) => {
-      if (u.band !== "grey" && !bands.has(u.band)) return false;
+      if (!bands.has(u.band)) return false;
       if (flag === "CLOCK") { if (!clockFlag(u)) return false; }
       else if (flag && !u.reasons.some((r) => r.code === flag)) return false;
       if (q && !(u.name + " " + u.ward + " " + u.lga).toUpperCase().includes(q)) return false;
@@ -233,16 +233,24 @@
     focusUnit("PU000002");
   });
 
+  // Read-only hook for automated end-to-end tests (no effect on the app).
+  window.__gur = { map, markers, getUnits: () => units, getView: () => view };
+
+  // Deep links: #N~PU000002 (national view) or #KANO~PU154001 (state view).
+  async function handleHash() {
+    const [v, id] = decodeURIComponent(location.hash.slice(1)).split("~");
+    const target = v && v !== "N" && summary.index.some((s) => s.state === v) ? v : NATIONAL;
+    if (target !== view || !units.length) { $("state").value = target; await loadView(target); }
+    if (id) focusUnit(id);
+  }
+  window.addEventListener("hashchange", () => { handleHash().catch(() => {}); });
+
   (async function init() {
     summary = await getJSON("data/summary.json");
     renderStats();
     renderStateOptions();
-    await loadView(NATIONAL);
-    const [v, id] = decodeURIComponent(location.hash.slice(1)).split("~");
-    if (id) {
-      if (v !== "N" && summary.index.some((s) => s.state === v)) { $("state").value = v; await loadView(v); }
-      focusUnit(id);
-    }
+    view = null;
+    await handleHash();
   })().catch((err) => {
     $("stateHint").textContent = "Could not load data: " + err.message + ". Run the pipeline, then serve the web/ folder over HTTP.";
   });

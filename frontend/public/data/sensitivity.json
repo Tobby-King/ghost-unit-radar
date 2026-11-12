@@ -1,0 +1,66 @@
+{
+ "radius": [
+  {
+   "radius_km": 0.5,
+   "red": 4055,
+   "amber": 3127,
+   "register_above_adults": 5340,
+   "empty_catchment": 617,
+   "planted_detected": 894,
+   "planted": 900,
+   "synthetic_flags_not_planted": 5066
+  },
+  {
+   "radius_km": 1.0,
+   "red": 2828,
+   "amber": 2319,
+   "register_above_adults": 1773,
+   "empty_catchment": 233,
+   "planted_detected": 894,
+   "planted": 900,
+   "synthetic_flags_not_planted": 1129
+  },
+  {
+   "radius_km": 2.0,
+   "red": 2664,
+   "amber": 2203,
+   "register_above_adults": 1364,
+   "empty_catchment": 72,
+   "planted_detected": 867,
+   "planted": 900,
+   "synthetic_flags_not_planted": 589
+  }
+ ],
+ "seconds_per_voter": [
+  {
+   "seconds_per_voter": 30,
+   "sheets_exceeding": 301,
+   "planted_clock_detected": 300,
+   "sheets": 176623
+  },
+  {
+   "seconds_per_voter": 45,
+   "sheets_exceeding": 927,
+   "planted_clock_detected": 300,
+   "sheets": 176623
+  },
+  {
+   "seconds_per_voter": 60,
+   "sheets_exceeding": 5294,
+   "planted_clock_detected": 300,
+   "sheets": 176623
+  },
+  {
+   "seconds_per_voter": 90,
+   "sheets_exceeding": 24512,
+   "planted_clock_detected": 300,
+   "sheets": 176623
+  },
+  {
+   "seconds_per_voter": 120,
+   "sheets_exceeding": 46269,
+   "planted_clock_detected": 300,
+   "sheets": 176623
+  }
+ ]
+}
