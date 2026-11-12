@@ -1,9 +1,13 @@
 data/raw/
 data/out/
-pipeline/
-earth_engine/
-scripts/
+/pipeline/
+/earth_engine/
+/scripts/
 .venv/
 *.py
 requirements.txt
-tests/
+/tests/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/public/data/

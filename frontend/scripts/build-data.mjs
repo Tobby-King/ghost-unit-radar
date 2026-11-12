@@ -4,7 +4,7 @@
 //
 //   units.json      columnar index of all 176,623 units (coords, band, flags, synthetic sheet numbers)
 //   search.json     names + wards for search (loaded lazily)
-//   links.geojson   dashed lines: out-of-country coordinate -> claimed state
+//   state_centroids.json  claimed-state anchor points for the dashed "where it should be" links
 //   findings.json   20 least plausible units + per-state location problems
 //   showcase.json   5 units for the landing "strangest one" and presentation mode
 //   field_verification.csv
@@ -93,10 +93,7 @@ summary.index.forEach((entry, si) => {
 write("units.json", { generated: summary.generated, states, lgas, ...cols });
 write("search.json", search);
 
-// Dashed links for every out-of-country coordinate.
-const links = all.filter((u) => u.reasons.some((x) => x[0] === "OUTSIDE_NIGERIA") && u.lat != null && centroids[u.state])
-  .map((u) => ({ type: "Feature", properties: { i: u.i }, geometry: { type: "LineString", coordinates: [[u.lon, u.lat], centroids[u.state]] } }));
-write("links.geojson", { type: "FeatureCollection", features: links });
+// Claimed-state centroids: the map draws dashed links from out-of-country coordinates to these.
 fs.writeFileSync(path.join(OUT, "state_centroids.json"), JSON.stringify(centroids));
 
 // Least plausible: lowest score, then most reasons, then uid.
@@ -117,14 +114,15 @@ const has = (u, code) => u.reasons.some((x) => x[0] === code);
 const pickBy = (list, key) => list.reduce((best, u) => (best == null || key(u) > key(best) ? u : best), null);
 const waterloo = all.find((u) => u.uid === "PU000002") || pickBy(all.filter((u) => has(u, "OUTSIDE_NIGERIA")), (u) => -u.score);
 const ls = summary.national.largest_stack;
-const stack = all.find((u) => u.state === ls.state && u.lga === ls.lga && u.reasons.some((x) => x[0] === "STACKED" && x[2].startsWith(`${ls.size} `)));
+const stackSize = (u) => { const r = u.reasons.find((x) => x[0] === "STACKED"); return r ? parseInt(r[2], 10) || 0 : 0; };
+const stack = pickBy(all.filter((u) => (u.band === "red" || u.band === "amber") && stackSize(u) > 0 && !has(u, "OUTSIDE_NIGERIA")), (u) => stackSize(u) * 100 - u.score);
 const wrong = pickBy(all.filter((u) => has(u, "WRONG_STATE") && !has(u, "OUTSIDE_NIGERIA") && u.lat != null),
   (u) => { const c = centroids[u.state]; return c ? Math.hypot(u.lon - c[0], u.lat - c[1]) : 0; });
 const clock = pickBy(all.filter((u) => has(u, "CLOCK_IMPOSSIBLE") && u.lat != null && u.devices), (u) => u.accredited / u.devices);
 const reg = pickBy(all.filter((u) => has(u, "REGISTER_ABOVE_ADULTS") && u.lat != null), (u) => (u.adults_r ? u.register / u.adults_r : 0));
 const caption = {
   outside: "Official coordinates put this Kogi State polling unit in Canada.",
-  stack: `${ls.size} polling units share one exact coordinate – a centroid, not a GPS fix.`,
+  stack: `${stack ? stackSize(stack) : ls.size} polling units share this one exact coordinate – a centre point, not a GPS fix.`,
   wrong: "Listed in one state; the published coordinate falls in another.",
   clock: "The synthetic result sheet claims more voters than one BVAS device could accredit.",
   register: "The synthetic register is far larger than the adults who live nearby.",
@@ -145,5 +143,5 @@ fs.writeFileSync(path.join(OUT, "field_verification.csv"),
   + [head.join(","), ...lines].join("\n"));
 
 const size = (f) => (fs.statSync(path.join(OUT, f)).size / 1e6).toFixed(2) + " MB";
-console.log(`[data] ${all.length} units, ${links.length} links, ${showcase.length} showcase; units.json ${size("units.json")}, search.json ${size("search.json")}`);
+console.log(`[data] ${all.length} units, ${showcase.length} showcase; units.json ${size("units.json")}, search.json ${size("search.json")}`);
 console.log("[data] showcase:", showcase.map((s) => `${s.kind}=${s.uid}`).join(" "));

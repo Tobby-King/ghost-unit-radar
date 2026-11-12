@@ -1,7 +1,7 @@
 {
   "framework": null,
-  "buildCommand": "",
-  "installCommand": "",
-  "outputDirectory": "web",
+  "installCommand": "cd frontend && npm ci --no-audit --no-fund",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/out",
   "headers": [{ "source": "/data/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }]
 }
