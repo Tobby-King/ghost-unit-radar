@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ghost Unit Radar – Methods</title>
+<link rel="stylesheet" href="styles.css">
+<style>body{display:block}</style>
+</head>
+<body>
+<div class="banner" role="note"><strong>Registers and result sheets shown are SYNTHETIC.</strong> Location findings use real public data. A flag means <em>needs field verification</em>, never "fraud".</div>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><h1>Ghost Unit Radar</h1></div>
+  <nav><a href="index.html">Map</a><a href="methods.html" aria-current="page">Methods &amp; Ethics</a></nav>
+</header>
+<main class="doc">
+  <p class="callout"><strong>What this is:</strong> a data-quality <em>triage</em> tool that helps INEC, accredited observers and
+  journalists decide where to send field checks. It scores whether each polling unit is <em>physically plausible</em>, based on
+  where it is and how many people live around it. <strong>It does not detect fraud.</strong> Most flags will have innocent causes, and every flag
+  shows one.</p>
+
+  <h2>The three checks</h2>
+  <h3>1. Location integrity <span class="tag real">REAL DATA</span></h3>
+  <p>Every published coordinate is tested against Nigeria's state boundaries. A coordinate is flagged if it is
+  <b>outside Nigeria</b>, <b>in a different state</b> from the one INEC lists (points within <span data-p="border_tolerance_km"></span> km of the
+  border are allowed, because the boundaries are simplified), or <b>stacked</b>, meaning <span data-p="stack_min"></span> or more units share one exact point,
+  which shows a ward or LGA centroid was used instead of a GPS fix.</p>
+  <h3>2. Population plausibility <span class="tag real">WORLDPOP</span> + <span class="tag synth">SYNTHETIC REGISTER</span></h3>
+  <p>For each unit with a usable coordinate we estimate the adults living within <span data-p="radius_km"></span> km. We take WorldPop's satellite-derived
+  2020 population density, multiply by the circle's area, then by an adult (18+) share of <span data-p="adult_share"></span>. Nigeria's population is very young:
+  about 43% are under 15 and 6–7% are 15–17 (UN WPP). We divide that by the number of polling units in the same circle to get
+  the adults this unit plausibly serves, then compare it with the (synthetic) register. A register above 1.2× is amber; above 2× or with
+  almost no residents it is red. Units with an unreliable coordinate (outside Nigeria, wrong state, stacked) are <em>not</em> scored
+  on population, because their catchment would be meaningless.</p>
+  <h3>3. Clock audit <span class="tag synth">SYNTHETIC RESULT SHEETS</span></h3>
+  <p>One BVAS device takes roughly 30–120 seconds per voter. The maximum number of voters a unit can accredit is
+  <code>polling hours × 3600 ÷ seconds per voter × devices</code>. A sheet is <b>impossible</b> if it exceeds this at the fastest 30 s,
+  and <b>implausible</b> if it exceeds it at the typical speed (default 45 s, adjustable on the map from 30 to 120 s).</p>
+
+  <h3>Score</h3>
+  <p>Each unit starts at 100 and each reason subtracts a documented penalty, as shown in the table below. 70 or above is green, 40–69 amber, and below 40 red.</p>
+  <table><thead><tr><th>Reason</th><th>Data</th><th>Penalty</th><th>Typical innocent explanation</th></tr></thead><tbody>
+    <tr><td>Outside Nigeria</td><td>Real</td><td class="n">70</td><td>Geocoder matched the school or village name to a place abroad; lat/lon swapped</td></tr>
+    <tr><td>In a different state</td><td>Real</td><td class="n">45</td><td>Same-named place in another state; typo in the coordinate</td></tr>
+    <tr><td>Stacked ≥10 / ≥50</td><td>Real</td><td class="n">20 / 30</td><td>Centroid used instead of a GPS fix</td></tr>
+    <tr><td>Register above adults 1.2× / 2× / 3×</td><td>Synthetic</td><td class="n">25 / 45 / 65</td><td>Register not cleaned after people moved; new estate missing from 2020 population data</td></tr>
+    <tr><td>Almost nobody lives here (&lt;250 adults within the radius, register &gt;2× that)</td><td>Synthetic</td><td class="n">65</td><td>Scattered rural catchment wider than the radius; wrong coordinate</td></tr>
+    <tr><td>Clock impossible / implausible</td><td>Synthetic</td><td class="n">50 / 20</td><td>Extended hours for voters queued at close; unrecorded device; data-entry error</td></tr>
+  </tbody></table>
+
+  <h2>Findings on real data</h2>
+  <div id="findings">Loading…</div>
+
+  <h2>Validation on synthetic anomalies</h2>
+  <p>We planted <span data-p="planted"></span> anomalies of known type (30 per state with coordinates) in the synthetic registers and result sheets.
+  The ground truth is in <code>data/out/planted_ground_truth.csv</code>.</p>
+  <div id="validation"></div>
+  <p>Some flags are not planted (see the last row of the table). They arise from the synthetic generator and the coarse 1 km population grid,
+  mostly in sparse rural areas. Real-world false alarms of the same kind are expected, which is why every flag goes to <em>field verification</em>.</p>
+
+  <h2>Sensitivity analysis</h2>
+  <p>We reran the pipeline at three radii and five BVAS speeds (<code>pipeline/sensitivity.py</code>). A smaller radius produces many more
+  false alarms in sparse areas. A larger one dilutes real anomalies. We use 1 km. The clock result depends heavily on the assumed speed,
+  which is why a sheet is only called "impossible" at the fastest 30 s.</p>
+  <div id="sens">Loading…</div>
+
+  <h2>Data sources and licences</h2>
+  <table><thead><tr><th>Data</th><th>Use</th><th>Licence</th></tr></thead><tbody>
+    <tr><td><a href="https://github.com/mykeels/inec-polling-units">mykeels/inec-polling-units</a>: 176,623 units scraped from INEC's public site (2022)</td><td>Names, wards, LGAs, coordinates</td><td>MIT</td></tr>
+    <tr><td><a href="https://www.geoboundaries.org/">geoBoundaries</a> gbOpen NGA ADM1 (simplified)</td><td>State boundaries</td><td>CC BY 4.0</td></tr>
+    <tr><td><a href="https://hub.worldpop.org/geodata/summary?id=6303">WorldPop</a> Global 1 km population 2020, Nigeria</td><td>Population density</td><td>CC BY 4.0</td></tr>
+    <tr><td><a href="https://research.google/blog/open-buildings-25d-temporal-dataset-tracks-building-changes-across-the-global-south/">Google Open Buildings 2.5D Temporal</a> via Earth Engine (optional)</td><td>Rooftops per year 2016–2023</td><td>CC BY 4.0 / ODbL</td></tr>
+    <tr><td>OpenStreetMap tiles</td><td>Basemap</td><td>ODbL / OSM tile usage policy</td></tr>
+  </tbody></table>
+
+  <h2>Responsible use and ethics</h2>
+  <ul>
+    <li><b>No INEC system is accessed.</b> No IReV or voter-registration queries are made. Only static public files are used.</li>
+    <li><b>No personal data.</b> The tool works at polling-unit level. No voter names or numbers are used or generated.</li>
+    <li><b>Synthetic registers.</b> Every registered-voter and result-sheet number is generated and labelled SYNTHETIC wherever it appears.
+      With real INEC data the same code would produce real scores. That should only happen under INEC's authority.</li>
+    <li><b>Non-partisan.</b> No party, candidate or result data is used. Scores are the same for every unit regardless of politics.</li>
+    <li><b>"Needs verification", never "fraud".</b> Flags are leads, and each comes with its most likely innocent cause.
+      The 2022 coordinates are mostly geocoded, not surveyed, so location flags mainly show where INEC's published map needs cleaning.</li>
+    <li><b>Explainable, not a black box.</b> Every score is a sum of named, documented penalties. There is no hidden model.</li>
+  </ul>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>The polling-unit list is a 2022 snapshot. INEC may have corrected coordinates since then.</li>
+    <li>The 1 km population grid smooths dense neighbourhoods and misses very new settlements. The Earth Engine script
+      (<code>earth_engine/catchment_export.js</code>) upgrades this to WorldPop 100 m age-structured data plus Open Buildings counts.</li>
+    <li>The adult share is a national constant. Regional age structures differ.</li>
+    <li>A fixed radius is a simple catchment. Real units serve irregular areas, and rural units often draw voters from further away.</li>
+    <li>State boundaries are simplified. Units near borders are given a <span data-p="border_tolerance_km"></span> km tolerance.</li>
+    <li>LGA-level and water-body checks are not yet included.</li>
+  </ul>
+</main>
+<script>
+(async function () {
+  const s = await (await fetch("data/summary.json")).json();
+  const f = (n) => Number(n).toLocaleString("en-NG");
+  const p = { ...s.params, planted: f(s.synthetic_validation.planted) };
+  document.querySelectorAll("[data-p]").forEach((el) => { el.textContent = p[el.dataset.p]; });
+  const n = s.national;
+  document.getElementById("findings").innerHTML = `
+    <table><tbody>
+    <tr><td>Polling units in the published list</td><td class="n">${f(n.units)}</td></tr>
+    <tr><td>With a coordinate</td><td class="n">${f(n.with_coordinates)}</td></tr>
+    <tr><td>Without a coordinate (all units in ${s.no_coordinate_states.length} states: ${s.no_coordinate_states.map((x) => x.toLowerCase()).join(", ")})</td><td class="n">${f(n.without_coordinates)}</td></tr>
+    <tr><td>Coordinate outside Nigeria</td><td class="n">${f(n.outside_nigeria)}</td></tr>
+    <tr><td>Coordinate in a different state</td><td class="n">${f(n.wrong_state)}</td></tr>
+    <tr><td>Units stacked ≥${s.params.stack_min} on one exact point (${f(n.stacked_points)} points)</td><td class="n">${f(n.stacked_units)}</td></tr>
+    <tr><td>Largest stack</td><td class="n">${f(n.largest_stack.size)} units, ${n.largest_stack.lga.toLowerCase()} (${n.largest_stack.state.toLowerCase()})</td></tr>
+    </tbody></table>
+    <p>Where the out-of-country coordinates land: ${n.top_foreign_places.map(([pl, c]) => `${pl} (${f(c)})`).join(", ")}.</p>`;
+  const v = s.synthetic_validation;
+  document.getElementById("validation").innerHTML = `<table><thead><tr><th>Planted type</th><th>Planted</th><th>Flagged red/amber</th></tr></thead><tbody>
+    ${Object.entries(v.by_type).map(([t, x]) => `<tr><td>${t}</td><td class="n">${f(x.planted)}</td><td class="n">${f(x.detected)} (${(100 * x.detected / x.planted).toFixed(1)}%)</td></tr>`).join("")}
+    <tr><td><b>All</b></td><td class="n"><b>${f(v.planted)}</b></td><td class="n"><b>${f(v.detected)} (${(100 * v.detected / v.planted).toFixed(1)}%)</b></td></tr>
+    <tr><td>Synthetic-data flags on units that were <em>not</em> planted</td><td class="n" colspan="2">${f(v.synthetic_flags_not_planted)}</td></tr>
+    </tbody></table>`;
+  try {
+    const t = await (await fetch("data/sensitivity.json")).json();
+    document.getElementById("sens").innerHTML = `<table><thead><tr><th>Radius</th><th>Red</th><th>Amber</th><th>Planted anomalies flagged</th><th>Synthetic flags not planted</th></tr></thead><tbody>
+      ${t.radius.map((r) => `<tr><td>${r.radius_km} km</td><td class="n">${f(r.red)}</td><td class="n">${f(r.amber)}</td><td class="n">${f(r.planted_detected)} / ${f(r.planted)}</td><td class="n">${f(r.synthetic_flags_not_planted)}</td></tr>`).join("")}
+      </tbody></table><table style="margin-top:12px"><thead><tr><th>Seconds per voter</th><th>Max per device (6 h)</th><th>Synthetic sheets exceeding</th><th>Planted clock anomalies caught</th></tr></thead><tbody>
+      ${t.seconds_per_voter.map((r) => `<tr><td>${r.seconds_per_voter} s</td><td class="n">${f(Math.floor(21600 / r.seconds_per_voter))}</td><td class="n">${f(r.sheets_exceeding)}</td><td class="n">${f(r.planted_clock_detected)}</td></tr>`).join("")}
+      </tbody></table>`;
+  } catch (e) { document.getElementById("sens").textContent = "Run pipeline/sensitivity.py to generate this table."; }
+})();
+</script>
+</body>
+</html>

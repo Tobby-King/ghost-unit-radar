@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ghost Unit Radar</title>
+<meta name="description" content="Data-quality triage for Nigerian polling units: location integrity, population plausibility and a BVAS clock audit. Registers shown are synthetic.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="banner" role="note">
+  <strong>Registers and result sheets shown are SYNTHETIC.</strong>
+  Location findings use real public data (INEC list as scraped in 2022). A flag means
+  <em>needs field verification</em>, never "fraud". <a href="methods.html">Methods &amp; ethics</a>
+</div>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><h1>Ghost Unit Radar</h1></div>
+  <nav><a href="index.html" aria-current="page">Map</a><a href="methods.html">Methods &amp; Ethics</a>
+    <a href="https://github.com/mykeels/inec-polling-units" target="_blank" rel="noopener">Data</a></nav>
+</header>
+<main class="layout">
+  <aside class="panel" id="panel">
+    <section class="stats" id="stats" aria-label="National location-integrity findings"></section>
+
+    <section class="controls">
+      <label for="state">View</label>
+      <select id="state"></select>
+      <p class="hint" id="stateHint"></p>
+
+      <fieldset class="bands" id="bands">
+        <legend>Triage band</legend>
+        <label><input type="checkbox" value="red" checked><span class="dot red"></span>Red</label>
+        <label><input type="checkbox" value="amber" checked><span class="dot amber"></span>Amber</label>
+        <label><input type="checkbox" value="green" checked><span class="dot green"></span>Green</label>
+      </fieldset>
+
+      <label for="flag">Flag type</label>
+      <select id="flag">
+        <option value="">All units</option>
+        <option value="OUTSIDE_NIGERIA">Outside Nigeria (real)</option>
+        <option value="WRONG_STATE">In a different state (real)</option>
+        <option value="STACKED">Stacked coordinate (real)</option>
+        <option value="REGISTER_ABOVE_ADULTS">Register above adults (synthetic)</option>
+        <option value="EMPTY_CATCHMENT">Almost nobody lives here (synthetic)</option>
+        <option value="CLOCK">Clock audit (synthetic)</option>
+      </select>
+
+      <label for="q">Search unit, ward or LGA</label>
+      <input id="q" type="search" placeholder="e.g. INELE, OLAMABORO">
+
+      <div class="clock">
+        <label for="spv">Clock audit: seconds per voter <output id="spvOut">45</output> s</label>
+        <input id="spv" type="range" min="30" max="120" step="5" value="45">
+        <p class="hint" id="clockHint"></p>
+      </div>
+
+      <div class="actions">
+        <button id="download" type="button">Download field-verification list (CSV)</button>
+        <button id="waterloo" type="button" class="ghost">Show me the Waterloo unit</button>
+      </div>
+    </section>
+
+    <section class="list">
+      <h2 id="listTitle">Least plausible units in view</h2>
+      <ol id="list"></ol>
+    </section>
+  </aside>
+
+  <div class="mapwrap">
+    <div id="map" aria-label="Map of polling units"></div>
+    <div class="legend"><span class="dot red"></span>needs field verification <span class="dot amber"></span>check
+      <span class="dot green"></span>nothing unusual</div>
+    <article class="card" id="card" hidden aria-live="polite"></article>
+  </div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
