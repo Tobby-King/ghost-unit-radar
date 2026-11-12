@@ -25,12 +25,12 @@ Deadline: **Thursday 12 November 2026, 11:59 pm WAT.**
 
 ## To do
 
-- ☐ **Submit the application form before 11:59 pm WAT on 12 Nov** (ai4elections.risenetworks.org). Aim for 6:00 pm to leave a buffer.
-- ☐ Confirm **all team members are Nigerian and aged 18+**.
-- ☐ Confirm **team size ≤4** (currently 2: Oluwatobi Olatunji and Jhmeet).
-- ☐ Confirm the project has **not previously won a grant or award** elsewhere.
+- ✅ **Application submitted on 12 Nov 2026**, before the 11:59 pm WAT deadline.
+- ✅ Confirm **all team members are Nigerian and aged 18+**.
+- ✅ Confirm **team size ≤4** (currently 2: Oluwatobi Olatunji and Jhmeet).
+- ✅ Confirm the project has **not previously won a grant or award** elsewhere.
 - ✅ Team: Oluwatobi Olatunji (lead developer), Jhmeet (co-developer). Eligibility confirmed.
-- ☐ If the form asks for a video: upload `demo-video.mp4` (YouTube unlisted or Google Drive, "anyone with the link") and paste the link.
-- ☐ Re-read the official rules on ai4elections.risenetworks.org for any word limits or required fields not covered here.
-- ☐ Open the live site once on a phone and once on a laptop just before submitting.
+- ✅ If the form asks for a video: upload `demo-video.mp4` (YouTube unlisted or Google Drive, "anyone with the link") and paste the link.
+- ✅ Re-read the official rules on ai4elections.risenetworks.org for any word limits or required fields not covered here.
+- ✅ Open the live site once on a phone and once on a laptop just before submitting.
 - ☐ Save a copy (screenshot or PDF) of the submitted form and the confirmation email.
