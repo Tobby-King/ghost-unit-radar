@@ -19,7 +19,7 @@ Deadline: **Thursday 12 November 2026, 11:59 pm WAT.**
 - ✅ Application answers drafted: `application-answers.md`
 - ✅ Demo video script: `demo-video-script.md`
 - ✅ Grand Finale pitch outline: `pitch-5min.md`
-- ✅ Demo video recorded from the live site, 1080p with voice-over and captions: `demo-video.mp4` (2:33)
+- ✅ Demo video recorded from the live site, 1080p with voice-over and captions: `demo-video.mp4` (2:35), voice by Kokoro
 - ✅ Screenshots (`screenshots/`) and logo files (`logo/`)
 - ✅ Latest code pushed to GitHub
 

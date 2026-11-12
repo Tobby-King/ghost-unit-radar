@@ -16,7 +16,7 @@ Team: Oluwatobi Olatunji and Jhmeet [CHECK: full name].
 | `README.md` | This index. |
 | `application-answers.md` | Ready-to-paste answers for the application form, each with a ≤50-word short version. |
 | `demo-video-script.md` | Voice-over text with start times, for re-recording in your own voice. |
-| `demo-video.mp4` | 2½-minute demo of the live app with voice-over and captions (1920×1080, H.264). **Upload this one.** |
+| `demo-video.mp4` | 2½-minute demo of the live app with a Kokoro AI voice-over and captions (1920×1080, H.264). **Upload this one.** |
 | `demo-video-captions.srt` | Captions as a separate file, for YouTube or Drive. |
 | `demo-video-no-voice.mp4` | The same video with no sound, if you'd rather record your own voice (local copy only, not in git). |
 | `screenshots/` | Nine screenshots from the live site: map overview, Waterloo unit card, world view of out-of-country units, a clock-audit unit, the Findings report, Methods & Ethics, presentation mode, and two phone views. |

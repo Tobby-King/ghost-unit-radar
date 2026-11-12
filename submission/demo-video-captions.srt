@@ -1,115 +1,115 @@
 1
-00:00:00,150 --> 00:00:03,322
+00:00:00,150 --> 00:00:03,333
 Nigeria has 176,623 polling units.
 
 2
-00:00:03,322 --> 00:00:11,720
+00:00:03,333 --> 00:00:11,760
 Ghost Unit Radar checks every published location, so field teams know where to look first.
 
 3
-00:00:12,420 --> 00:00:16,763
+00:00:12,460 --> 00:00:16,733
 This is a primary school in Olamaboro, Kogi State.
 
 4
-00:00:16,763 --> 00:00:24,840
+00:00:16,733 --> 00:00:24,680
 According to INEC's published list, it sits in Waterloo, Canada — 9,196 kilometres from Kogi.
 
 5
-00:00:25,542 --> 00:00:29,463
+00:00:25,379 --> 00:00:29,656
 Every unit gets a plausibility score and a plain-English reason.
 
 6
-00:00:29,463 --> 00:00:32,833
+00:00:29,656 --> 00:00:33,331
 For every flag, we show the most likely innocent cause.
 
 7
-00:00:32,833 --> 00:00:37,122
+00:00:33,331 --> 00:00:38,009
 Here, a geocoder probably matched the school's name to a place abroad.
 
 8
-00:00:38,371 --> 00:00:43,501
+00:00:39,264 --> 00:00:44,507
 Check one is location integrity, on real public data.
 
 9
-00:00:43,501 --> 00:00:46,598
+00:00:44,507 --> 00:00:47,673
 1,515 units sit outside Nigeria.
 
 10
-00:00:46,598 --> 00:00:50,082
+00:00:47,673 --> 00:00:51,234
 2,243 are placed in the wrong state.
 
 11
-00:00:50,082 --> 00:00:57,341
+00:00:51,234 --> 00:00:58,654
 And 43,373 are stacked on shared points, so their real location is unknown.
 
 12
-00:00:58,668 --> 00:01:00,890
+00:00:59,943 --> 00:01:02,366
 Check two is population plausibility.
 
 13
-00:01:00,890 --> 00:01:07,134
+00:01:02,366 --> 00:01:09,176
 We count adults within one kilometre from satellite population data, and compare that with the register.
 
 14
-00:01:07,134 --> 00:01:12,358
+00:01:09,176 --> 00:01:14,873
 The registers here are synthetic, as the hackathon rules require, and clearly labelled.
 
 15
-00:01:14,214 --> 00:01:15,876
+00:01:16,728 --> 00:01:18,513
 Check three is a clock audit.
 
 16
-00:01:15,876 --> 00:01:24,644
+00:01:18,513 --> 00:01:27,928
 A BVAS device needs about thirty to a hundred and twenty seconds per voter, so there is a physical limit on how many voters can be accredited in one day.
 
 17
-00:01:25,346 --> 00:01:28,878
+00:01:28,629 --> 00:01:32,419
 Change that assumption, and the flags update instantly.
 
 18
-00:01:28,878 --> 00:01:33,951
+00:01:32,419 --> 00:01:37,862
 Observers can build a field-verification list and download it as a spreadsheet.
 
 19
-00:01:33,951 --> 00:01:35,493
+00:01:37,862 --> 00:01:39,516
 A flag never says fraud.
 
 20
-00:01:35,493 --> 00:01:37,676
+00:01:39,516 --> 00:01:41,859
 It says: needs field verification.
 
 21
-00:01:41,274 --> 00:01:45,164
+00:01:44,838 --> 00:01:48,528
 The findings page summarises the results, state by state.
 
 22
-00:01:48,567 --> 00:01:53,373
+00:01:51,177 --> 00:01:56,179
 The methods page shows every rule, our data licences and our limits.
 
 23
-00:01:53,373 --> 00:01:54,716
+00:01:56,179 --> 00:01:57,577
 No black-box model.
 
 24
-00:01:54,716 --> 00:01:55,918
+00:01:57,577 --> 00:01:58,827
 No personal data.
 
 25
-00:01:55,918 --> 00:01:57,897
+00:01:58,827 --> 00:02:00,887
 No INEC system was accessed.
 
 26
-00:02:00,413 --> 00:02:05,573
+00:02:02,920 --> 00:02:08,100
 Presentation mode steps through the strangest units, for a briefing room or a newsroom.
 
 27
-00:02:16,225 --> 00:02:22,133
+00:02:18,502 --> 00:02:24,480
 We planted 900 anomalies in the synthetic data, and the checks caught 894.
 
 28
-00:02:22,133 --> 00:02:29,717
+00:02:24,480 --> 00:02:32,154
 Ghost Unit Radar helps INEC, observers and journalists decide where to look first, before 2027.
 
 29
-00:02:29,717 --> 00:02:30,515
+00:02:32,154 --> 00:02:32,962
 Thank you.
