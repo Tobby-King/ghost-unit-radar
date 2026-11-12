@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Ghost Unit Radar – How it works</title>
+<meta name="description" content="Ghost Unit Radar in plain language: what it is for, who it helps, and how it is built.">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { display: block; }
+  .lead { font-size: 18px; line-height: 1.55; }
+  .eg { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 14px 16px; margin: 16px 0; }
+  .eg b.big { font-size: 22px; display: block; margin-bottom: 4px; }
+  .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .check { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 14px; }
+  .check .q { font-weight: 700; font-size: 16px; margin: 6px 0; }
+  .check .n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 14px; }
+  .lights { display: grid; gap: 8px; margin: 12px 0; }
+  .lights div { display: flex; gap: 10px; align-items: baseline; }
+  .who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .who div { border-top: 3px solid var(--accent); padding-top: 8px; }
+
+  /* Architecture flow */
+  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; align-items: stretch; gap: 8px; margin: 18px 0 8px; }
+  .stage { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 12px; font-size: 14px; }
+  .stage h4 { margin: 0 0 2px; font-size: 15px; }
+  .stage .kind { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .stage ul { margin: 8px 0 0; padding-left: 18px; }
+  .stage li { margin: 3px 0; }
+  .stage.hl { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .arrow { align-self: center; color: var(--muted); font-size: 22px; }
+  .arrow::before { content: "→"; }
+  .opt { border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-top: 8px; }
+  .not { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 16px; padding: 0; list-style: none; }
+  .not li::before { content: "✕ "; color: var(--red); font-weight: 700; }
+  @media (max-width: 820px) {
+    .checks, .who { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr; }
+    .arrow { justify-self: center; }
+    .arrow::before { content: "↓"; }
+    .not { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="banner" role="note"><strong>Registers and result sheets shown are SYNTHETIC.</strong> Location findings use real public data. A flag means <em>needs field verification</em>, never "fraud".</div>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><h1>Ghost Unit Radar</h1></div>
+  <nav><a href="index.html">Map</a><a href="about.html" aria-current="page">How it works</a><a href="methods.html">Methods &amp; Ethics</a></nav>
+</header>
+<main class="doc">
+
+  <h2 style="margin-top:8px">What is this, in one sentence?</h2>
+  <p class="lead">Ghost Unit Radar is a <b>spell-checker for Nigeria's list of polling units</b>. It reads the official list,
+  compares each polling unit with satellite data, and highlights the ones that don't add up, so someone can go and check them in person.</p>
+
+  <h2>Why does it matter?</h2>
+  <p>Nigeria has about <b>176,000 polling units</b>, the places where people vote. INEC publishes a list saying where each one is.
+  If that list is wrong, it's hard for anyone to check the election properly. And mistakes in the list are also where "ghost"
+  polling units or padded voter numbers could hide unnoticed.</p>
+  <p>We checked the public list and found that it has real problems:</p>
+  <div class="eg">
+    <b class="big">A school in Kogi State is placed in Waterloo, Canada.</b>
+    <span id="egText">It is one of 1,515 polling units whose official location is outside Nigeria. Another 43,373 are piled
+    on top of each other, 10 or more on a single spot, and 57,326 have no location at all.</span>
+    <p style="margin:10px 0 0"><a href="index.html#N~PU000002">See it on the map →</a></p>
+  </div>
+
+  <h2>What does it check?</h2>
+  <p>Every polling unit is asked three simple questions:</p>
+  <div class="checks">
+    <div class="check"><span class="n">1</span><p class="q">Is it where it says it is?</p>
+      Is the location inside Nigeria, in the right state, and not stacked on top of dozens of other units?
+      <p class="hint">Uses the real public list.</p></div>
+    <div class="check"><span class="n">2</span><p class="q">Do enough people live there?</p>
+      Satellites show roughly how many people live around each spot. If a unit has 1,700 registered voters but only about 190 adults live nearby, that's odd.
+      <p class="hint">Uses real satellite population data and a made-up voter register.</p></div>
+    <div class="check"><span class="n">3</span><p class="q">Could the machine count that fast?</p>
+      Each voter-accreditation machine (BVAS) needs about 30–120 seconds per voter. In 6 hours one machine can't accredit 1,000 people.
+      <p class="hint">Uses made-up result sheets.</p></div>
+  </div>
+
+  <h3>The traffic light</h3>
+  <p>Each unit gets a score out of 100 and a colour:</p>
+  <div class="lights">
+    <div><span class="dot green"></span><span><b>Green</b>: nothing unusual found.</span></div>
+    <div><span class="dot amber"></span><span><b>Amber</b>: worth a second look.</span></div>
+    <div><span class="dot red"></span><span><b>Red</b>: needs someone to check it in person.</span></div>
+  </div>
+  <p>Every flag comes with a plain reason <em>and</em> the most likely innocent explanation (for example, "a computer guessed the location
+  from the school's name and picked a place in Canada"). <b>It never says "fraud".</b> Most flags will turn out to be honest mistakes. The point is to
+  know <em>where to look first</em>.</p>
+
+  <h2>Who is it for?</h2>
+  <div class="who">
+    <div><b>INEC staff</b><br>to find and fix wrong locations in the official list before 2027.</div>
+    <div><b>Election observers</b><br>to decide which polling units to visit, instead of choosing at random.</div>
+    <div><b>Journalists and citizens</b><br>to understand the quality of public election data, with sources they can check.</div>
+  </div>
+
+  <h2>How is it built? (the architecture)</h2>
+  <p>It's four simple pieces in a line. Data goes in on the left, a website comes out on the right:</p>
+
+  <div class="flow" role="list" aria-label="Architecture, left to right">
+    <div class="stage" role="listitem">
+      <span class="kind">1 · Inputs</span><h4>Public data files</h4>
+      <ul><li>INEC polling-unit list (176,623 units, public)</li>
+        <li>State boundary map</li>
+        <li>Satellite population map (WorldPop)</li>
+        <li><i>Made-up</i> voter registers and result sheets</li></ul>
+    </div>
+    <div class="arrow" aria-hidden="true"></div>
+    <div class="stage hl" role="listitem">
+      <span class="kind">2 · The engine</span><h4>Python pipeline</h4>
+      <ul><li>Runs the 3 checks on every unit</li>
+        <li>Adds up a score and writes the reasons</li>
+        <li>Runs on a laptop in about 25 seconds</li>
+        <li>44 automatic tests</li></ul>
+    </div>
+    <div class="arrow" aria-hidden="true"></div>
+    <div class="stage" role="listitem">
+      <span class="kind">3 · Results</span><h4>Plain files</h4>
+      <ul><li>One small data file per state (JSON)</li>
+        <li>Spreadsheet of units to check (CSV)</li>
+        <li>National summary</li></ul>
+    </div>
+    <div class="arrow" aria-hidden="true"></div>
+    <div class="stage" role="listitem">
+      <span class="kind">4 · Website</span><h4>Map in your browser</h4>
+      <ul><li>Static site hosted on Vercel</li>
+        <li>Map, filters, unit cards, download</li>
+        <li>Works on phones</li>
+        <li>85 automatic browser tests</li></ul>
+    </div>
+  </div>
+  <div class="opt"><b>Optional add-on:</b> a Google Earth Engine script counts <b>rooftops</b> around each unit from satellite
+  images (2016–2023), so the tool can say "1,400 voters but only 38 buildings". It plugs into step 2.</div>
+
+  <h3>What it deliberately does <em>not</em> have</h3>
+  <ul class="not">
+    <li>No connection to INEC's live systems (IReV, voter portal)</li>
+    <li>No personal data: no voter names or numbers</li>
+    <li>No database or server to hack, only read-only files</li>
+    <li>No login, tracking or accounts</li>
+    <li>No party, candidate or vote-count data (non-partisan)</li>
+    <li>No hidden AI "black box": every score is a sum of written rules</li>
+  </ul>
+  <p>Because the website is just files, it's cheap to run, fast, and hard to tamper with. Re-running the engine with new data
+  (for example, INEC's real register under INEC's authority) updates everything.</p>
+
+  <h2>Want the details?</h2>
+  <p>The <a href="methods.html">Methods &amp; Ethics</a> page has every rule, number, data source, licence and limitation. The code is open on
+  <a href="https://github.com/Tobby-King/ghost-unit-radar">GitHub</a>.</p>
+</main>
+<script>
+fetch("data/summary.json").then((r) => r.json()).then((s) => {
+  const n = s.national, f = (x) => Number(x).toLocaleString("en-NG");
+  document.getElementById("egText").textContent = `It is one of ${f(n.outside_nigeria)} polling units whose official location is outside Nigeria. `
+    + `Another ${f(n.stacked_units)} are piled on top of each other, ${s.params.stack_min} or more on a single spot, and ${f(n.without_coordinates)} have no location at all.`;
+}).catch(() => {});
+</script>
+</body>
+</html>

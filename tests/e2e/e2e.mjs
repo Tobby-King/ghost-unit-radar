@@ -298,6 +298,17 @@ try {
   await waitData();
   ok("16. Nav link back to map works", (await page.title()) === "Ghost Unit Radar");
 
+  // 16b. How it works page
+  await page.goto(BASE + "/about.html", { waitUntil: "networkidle2" }); await sleep(400);
+  const ab = await text("main");
+  ok("16b. About: plain-language summary", ab.includes("spell-checker") && ab.includes("never says"));
+  ok("16b. About: architecture shows 4 stages", (await page.$$eval(".flow .stage", (e) => e.length)) === 4);
+  ok("16b. About: live numbers filled", ab.includes("1,515") && ab.includes("43,373"));
+  ok("16b. About: 'See it on the map' deep link works", await page.$eval('a[href="index.html#N~PU000002"]', () => true).catch(() => false));
+  await page.screenshot({ path: `${SHOTS}/t16b_about.png`, fullPage: true });
+  await page.goto(BASE + "/index.html", { waitUntil: "domcontentloaded" }); await waitData();
+  ok("16b. Map has 'What is this?' intro + nav link", (await text(".intro")).includes("spell-checker") && !!(await page.$('nav a[href="about.html"]')));
+
   // 17. Mobile layout
   await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
   await page.goto(BASE + "/index.html#N~PU000002", { waitUntil: "domcontentloaded" });
@@ -306,6 +317,9 @@ try {
   ok("17. Mobile (390px): no horizontal scroll", !overflow);
   ok("17. Mobile: card opens", await cardOpen());
   await page.screenshot({ path: `${SHOTS}/t17_mobile.png` });
+  await page.goto(BASE + "/about.html", { waitUntil: "networkidle2" }); await sleep(300);
+  ok("17. Mobile: about page has no horizontal scroll", !(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)));
+  await page.screenshot({ path: `${SHOTS}/t17_about_mobile.png`, fullPage: true });
 
   // 18. Dark mode renders
   await page.setViewport({ width: 1400, height: 900 });

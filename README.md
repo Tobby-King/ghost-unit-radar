@@ -12,6 +12,29 @@ It never says "fraud". It says **"needs field verification"**.
 > **Registers and result sheets in this project are SYNTHETIC.** Location findings use real public data.
 > No INEC live system (IReV, CVR portal, etc.) is accessed. Only static public files are used.
 
+## In plain language
+
+**A spell-checker for Nigeria's list of polling units.** It reads INEC's public list, compares each polling unit with satellite
+data, and highlights the ones that don't add up (a Kogi school placed in Canada, 1,700 voters where about 190 adults live,
+a machine "accrediting" more people than is physically possible), so INEC, observers or journalists know **where to check in person first**.
+Green means nothing unusual, amber means worth a look, red means needs field verification. It never says "fraud".
+
+## Architecture
+
+```
+ 1. INPUTS (static public files)      2. ENGINE (Python, ~25 s)          3. RESULTS (plain files)      4. WEBSITE (static, Vercel)
+ ─────────────────────────────        ─────────────────────────          ───────────────────────       ──────────────────────────
+ INEC polling-unit list (MIT)   ──►   check 1: location integrity  ──►   web/data/states/*.json  ──►   Leaflet map in the browser
+ State boundaries (geoBoundaries)     check 2: population plausibility   web/data/summary.json         filters · unit cards
+ WorldPop satellite population        check 3: BVAS clock audit          data/out/units.csv            CSV download
+ SYNTHETIC registers + sheets         score 0-100 + reasons              field_verification.csv        How it works · Methods
+        ▲                                     ▲
+        └── optional: Google Earth Engine rooftop counts (Open Buildings 2016-2023)
+```
+
+No server, no database, no login, no personal data, and no connection to INEC's live systems. The website is read-only files.
+A plain-language version with a diagram is at [/about.html](https://ghost-unit-radar.vercel.app/about.html).
+
 ## Findings from real public data (all 176,623 published units)
 
 | Finding | Units |
@@ -74,7 +97,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cd web && python3 -m http.server 8000           # open http://localhost:8000
 ```
 
-Browser end-to-end tests (78 checks: every control, card, filter, download, deep link, mobile, themes),
+Browser end-to-end tests (85 checks: every control, card, filter, download, deep link, mobile, themes),
 using your installed Chrome:
 
 ```bash
