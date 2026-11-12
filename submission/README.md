@@ -1,7 +1,7 @@
 # Ghost Unit Radar — submission pack
 
 AI4Elections Hackathon 2026 (Nigeria). Tracks: Electoral data analysis · Election observation and citizen accountability.
-Team: Oluwatobi Olatunji and Jhmeet [CHECK: full name].
+Team: Oluwatobi Olatunji and Jhmeet.
 
 ## Links
 
@@ -15,6 +15,7 @@ Team: Oluwatobi Olatunji and Jhmeet [CHECK: full name].
 |---|---|
 | `README.md` | This index. |
 | `application-answers.md` | Ready-to-paste answers for the application form, each with a ≤50-word short version. |
+| `FORM-PASTE-SHEET.md` | **Start here to submit.** Every answer in the order the application form asks for it. |
 | `demo-video-script.md` | Voice-over text with start times, for re-recording in your own voice. |
 | `demo-video.mp4` | 2½-minute demo of the live app with a Kokoro AI voice-over and captions (1920×1080, H.264). **Upload this one.** |
 | `demo-video-captions.srt` | Captions as a separate file, for YouTube or Drive. |

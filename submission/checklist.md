@@ -29,7 +29,7 @@ Deadline: **Thursday 12 November 2026, 11:59 pm WAT.**
 - ☐ Confirm **all team members are Nigerian and aged 18+**.
 - ☐ Confirm **team size ≤4** (currently 2: Oluwatobi Olatunji and Jhmeet).
 - ☐ Confirm the project has **not previously won a grant or award** elsewhere.
-- ☐ Fill in team names and roles: Jhmeet's full name and role are [CHECK].
+- ✅ Team: Oluwatobi Olatunji (lead developer), Jhmeet (co-developer). Eligibility confirmed.
 - ☐ If the form asks for a video: upload `demo-video.mp4` (YouTube unlisted or Google Drive, "anyone with the link") and paste the link.
 - ☐ Re-read the official rules on ai4elections.risenetworks.org for any word limits or required fields not covered here.
 - ☐ Open the live site once on a phone and once on a laptop just before submitting.

@@ -1,7 +1,7 @@
 # Grand Finale pitch — 5 minutes
 
 **Event:** AI4Elections Hackathon 2026 Grand Finale, 16 December 2026, Lagos (in person).
-**Speakers:** Oluwatobi Olatunji (lead, demo) and Jhmeet [CHECK: full name] [CHECK: who presents which part].
+**Speakers:** Oluwatobi Olatunji (lead, demo) and Jhmeet [CHECK: who presents which part].
 **Set-up:** laptop with the live site open at https://ghost-unit-radar.vercel.app/#PU000002. Backup: press **P** for presentation mode, which steps through five showcase units. Second backup: the recorded demo video.
 
 Numbers are from the 12 Nov 2026 pipeline run (`web/data/summary.json`). [CHECK: re-run the pipeline and update numbers if anything changes before the finale.]
@@ -64,7 +64,7 @@ Say clearly which is which.
 
 ## 4:40–5:00 — Team and ask
 
-- **Team:** Oluwatobi Olatunji (lead developer, data pipeline); Jhmeet [CHECK: full name] ([CHECK: role]).
+- **Team:** Oluwatobi Olatunji (lead developer, data pipeline); Jhmeet (co-developer).
 - **Ask:**
   1. A data-sharing conversation with INEC: the current polling-unit coordinates and unit-level register counts, under INEC's authority.
   2. Introductions to one accredited observer group for a field pilot.

@@ -194,11 +194,11 @@ Next upgrades are practical: rooftop counts from Google Open Buildings (script w
 | Name | Role |
 |---|---|
 | Oluwatobi Olatunji | Lead developer and data pipeline |
-| Jhmeet [CHECK: full name] | [CHECK: role] |
+| Jhmeet | Co-developer |
 
-Team size: 2 (within the limit of 4). [CHECK: both members are Nigerian, aged 18+, and the project has not won an award elsewhere]
+Team size: 2 (within the limit of 4). Both members are Nigerian and aged 18+, and the project has not won an award elsewhere (confirmed 12 Nov 2026).
 
-**Short version (≤50 words):** Oluwatobi Olatunji (lead developer, data pipeline) and Jhmeet [CHECK: full name] ([CHECK: role]). Team of two.
+**Short version (≤50 words):** Oluwatobi Olatunji (lead developer, data pipeline) and Jhmeet (co-developer). Team of two.
 
 ---
 
@@ -210,4 +210,4 @@ Team size: 2 (within the limit of 4). [CHECK: both members are Nigerian, aged 18
 - **Methods and ethics:** https://ghost-unit-radar.vercel.app/methods/
 - **How it works (plain language):** https://ghost-unit-radar.vercel.app/about.html
 - **Source code (MIT):** https://github.com/Tobby-King/ghost-unit-radar
-- **Demo video:** [CHECK: add link once uploaded]
+- **Demo video:** https://github.com/Tobby-King/ghost-unit-radar/raw/main/submission/demo-video.mp4
