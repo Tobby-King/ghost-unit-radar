@@ -107,8 +107,10 @@ export function TopBar({ active, children }: { active: "/" | "/findings/" | "/me
         Polling-unit list: <span className="text-ink/80">INEC, retrieved 2022</span>
       </span>
       <nav className="ml-auto flex items-center gap-0.5 text-sm" aria-label="Main">
-        {NAV.map((n) => (
-          <Link key={n.href} href={n.href} prefetch={n.href.endsWith(".html") ? false : undefined} aria-current={active === n.href ? "page" : undefined}
+        {NAV.map((n) => n.href.endsWith(".html") ? (
+          <a key={n.href} href={n.href} className="hidden whitespace-nowrap rounded-chip px-2.5 py-1.5 text-muted hover:text-ink lg:inline">{n.label}</a>
+        ) : (
+          <Link key={n.href} href={n.href} aria-current={active === n.href ? "page" : undefined}
             className={`rounded-chip px-2.5 py-1.5 ${active === n.href ? "bg-raised text-ink" : "text-muted hover:text-ink"} ${n.href === "/methods/" ? "whitespace-nowrap" : ""} ${n.href === "/about.html" ? "hidden whitespace-nowrap lg:inline" : ""}`}>
             {n.href === "/methods/" ? <><span className="hidden sm:inline">Methods &amp; Ethics</span><span className="sm:hidden">Methods</span></> : n.label}
           </Link>
