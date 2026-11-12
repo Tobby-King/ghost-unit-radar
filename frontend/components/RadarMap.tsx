@@ -14,14 +14,16 @@ const STYLE = {
 const HEX = { ok: "#4C9F8B", review: "#E0A43A", field: "#E2574C", none: "#7A869C", accent: "#3FB8C9" };
 const SURF = {
   dark: { bg: "#0F1114", water: "#15191E", raised: "#1E2227", text: "#E9E6DF" },
-  light: { bg: "#F7F6F2", water: "#E2E6E9", raised: "#FFFFFF", text: "#181816" },
+  light: { bg: "#F4F3EF", water: "#C9DDEA", raised: "#FFFFFF", text: "#181816" },
 };
 
 export type PointProps = { i: number; b: number };
+export type Pad = { left?: number; right?: number; top?: number; bottom?: number };
 export interface RadarMapHandle {
-  flyTo: (lon: number, lat: number, zoom: number, opts?: { padRight?: number; padBottom?: number; duration?: number }) => void;
-  fitBounds: (b: [[number, number], [number, number]], opts?: { padRight?: number; padBottom?: number }) => void;
-  fitNigeria: () => void;
+  flyTo: (lon: number, lat: number, zoom: number, opts?: Pad & { duration?: number }) => void;
+  fitBounds: (b: [[number, number], [number, number]], opts?: Pad) => void;
+  fitNigeria: (opts?: Pad) => void;
+  zoomBy: (d: number) => void;
 }
 interface Props {
   points: FeatureCollection<Point, PointProps>;
@@ -30,8 +32,7 @@ interface Props {
   reducedMotion: boolean;
   onSelect: (i: number) => void;
   onReady?: () => void;
-  padRight: number;
-  padBottom: number;
+  pad: Pad;
   apiRef: Ref<RadarMapHandle>;
 }
 
@@ -43,9 +44,10 @@ export default function RadarMap(props: Props) {
   const theme = useRef<"dark" | "light">("dark");
 
   const duration = (d: number) => (live.current.reducedMotion ? 0 : d);
-  const padding = (o?: { padRight?: number; padBottom?: number }) => ({
-    top: 40, left: 40, right: 40 + (o?.padRight ?? live.current.padRight), bottom: 40 + (o?.padBottom ?? live.current.padBottom),
-  });
+  const padding = (o?: Pad) => {
+    const p = { ...live.current.pad, ...o };
+    return { top: 40 + (p.top ?? 0), left: 40 + (p.left ?? 0), right: 40 + (p.right ?? 0), bottom: 40 + (p.bottom ?? 0) };
+  };
 
   useImperativeHandle(props.apiRef, () => ({
     flyTo(lon, lat, zoom, o) {
@@ -58,19 +60,23 @@ export default function RadarMap(props: Props) {
     fitBounds(b, o) {
       mapRef.current?.fitBounds(b, { padding: padding(o), duration: duration(1200), maxZoom: 12 });
     },
-    fitNigeria() {
-      mapRef.current?.fitBounds(NIGERIA_BOUNDS, { padding: padding(), duration: duration(1200) });
+    fitNigeria(o) {
+      mapRef.current?.fitBounds(NIGERIA_BOUNDS, { padding: padding(o), duration: duration(1200) });
+    },
+    zoomBy(d) {
+      const m = mapRef.current;
+      if (m) m.easeTo({ zoom: m.getZoom() + d, duration: duration(300) });
     },
   }));
 
   useEffect(() => {
     if (!box.current) return;
-    theme.current = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+    theme.current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
     const map = new maplibregl.Map({
       container: box.current,
       style: STYLE[theme.current],
       bounds: NIGERIA_BOUNDS,
-      fitBoundsOptions: { padding: 40 },
+      fitBoundsOptions: { padding: { ...padding(), top: padding().top + 60 } },
       minZoom: 1,
       maxZoom: 17,
       attributionControl: false,
@@ -79,7 +85,6 @@ export default function RadarMap(props: Props) {
     });
     mapRef.current = map;
     map.touchZoomRotate.disableRotation();
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     map.addControl(new maplibregl.AttributionControl({
       compact: true,
       customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> · Boundaries <a href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoBoundaries</a> CC BY 4.0',

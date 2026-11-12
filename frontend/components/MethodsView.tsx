@@ -111,7 +111,7 @@ export default function MethodsView() {
           <p>
             Each unit starts at 100 and each reason subtracts a documented penalty. There is no hidden model.
             70 or above is <Status i="●" c="text-ok">Plausible</Status>, 40–69 is <Status i="▲" c="text-review">Review</Status>, below 40 is
-            <Status i="◆" c="text-field"> Field check needed</Status>. Units without a coordinate are <Status i="○" c="text-none">No location published</Status>.
+            <Status i="◆" c="text-field"> Field check needed</Status>. Units without a coordinate are <Status i="○" c="text-nodata">No location published</Status>.
           </p>
           <Table head={["Reason", "Data", "Penalty", "Typical innocent explanation"]} rows={[
             ["Outside Nigeria", "Real", "70", "Geocoder matched the school or village name to a place abroad; lat/lon swapped"],

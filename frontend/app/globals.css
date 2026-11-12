@@ -46,7 +46,7 @@ body {
 .font-mono, .tabular { font-variant-numeric: tabular-nums slashed-zero; }
 h1, h2, h3, .font-display { font-family: "Source Serif 4", Georgia, serif; font-weight: 600; letter-spacing: -0.005em; }
 
-:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 4px; }
+@layer base { :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 4px; } }
 
 /* scrollbars that belong to the theme */
 * { scrollbar-width: thin; scrollbar-color: rgb(var(--line)) transparent; }
@@ -64,10 +64,12 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .btn-ghost { @apply btn border border-line text-ink hover:border-muted; }
 .label { @apply mb-1.5 block text-[13px] font-medium text-muted; }
 .panel { @apply rounded-[6px] border border-line bg-surface; }
+/* Floating map-app surfaces: white card, soft two-layer shadow */
+.float { background: rgb(var(--surface)); box-shadow: 0 1px 2px rgb(0 0 0 / .10), 0 4px 14px rgb(0 0 0 / .12); }
+:root[data-theme="dark"] .float { box-shadow: 0 1px 2px rgb(0 0 0 / .5), 0 6px 20px rgb(0 0 0 / .45); border: 1px solid rgb(var(--line)); }
 }
 
 /* MapLibre chrome in our tokens */
-@media (max-width: 767px) { .maplibregl-ctrl-top-right { top: 60px; } }
 .maplibregl-ctrl-group { background: rgb(var(--surface)) !important; border: 1px solid rgb(var(--line)); box-shadow: none !important; border-radius: 4px !important; }
 .maplibregl-ctrl-group button { width: 32px; height: 32px; }
 .maplibregl-ctrl-group button + button { border-top: 1px solid rgb(var(--line)) !important; }

@@ -17,7 +17,7 @@ export function StatusMark({ band, size = 10 }: { band: Band; size?: number }) {
     </svg>
   );
 }
-const SOLID: Record<Band, string> = { 0: "bg-ok", 1: "bg-review", 2: "bg-field", 3: "bg-none" };
+const SOLID: Record<Band, string> = { 0: "bg-ok", 1: "bg-review", 2: "bg-field", 3: "bg-nodata" };
 export function StatusPill({ band, size = "sm" }: { band: Band; size?: "sm" | "lg" }) {
   const s = STATUS[band];
   if (size === "lg") {
@@ -65,9 +65,9 @@ export function Logo({ className = "h-6 w-6" }: { className?: string }) {
 
 /* ---------- Theme ---------- */
 export function useTheme(): ["dark" | "light", () => void] {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   useEffect(() => {
-    setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
   }, []);
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";

@@ -12,15 +12,15 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0F1114",
+  themeColor: "#F7F6F2",
 };
 
-// Runs before paint so the stored theme never flashes. Dark is the default.
-const themeScript = `try{var t=localStorage.getItem("gur-theme");document.documentElement.dataset.theme=t==="light"?"light":"dark"}catch(e){document.documentElement.dataset.theme="dark"}`;
+// Runs before paint so the stored theme never flashes. Light is the default, like a map app.
+const themeScript = `try{var t=localStorage.getItem("gur-theme");document.documentElement.dataset.theme=t==="dark"?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-NG" data-theme="dark" suppressHydrationWarning>
+    <html lang="en-NG" data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

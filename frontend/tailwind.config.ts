@@ -19,7 +19,7 @@ export default {
         ok: v("--st-ok"),
         review: v("--st-review"),
         field: v("--st-field"),
-        none: v("--st-none"),
+        nodata: v("--st-none"),
       },
       fontFamily: {
         sans: ['"IBM Plex Sans"', "system-ui", "sans-serif"],

@@ -49,7 +49,9 @@ export default function UnitCard({ unit: u, loading, summary, centroids, spv, in
       <header className="px-5 pb-5 pt-4">
         <div className="flex items-center justify-between gap-3 text-[13px] text-muted">
           <span>Polling unit <span className="font-mono">{u.uid}</span></span>
-          <button type="button" onClick={onClose} className="-mr-1 px-1 text-muted hover:text-ink" aria-label="Close unit card">Close ✕</button>
+          <button type="button" onClick={onClose} className="-mr-2 grid h-9 w-9 place-items-center rounded-full bg-raised text-ink hover:bg-line" aria-label="Close unit card">
+            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="m5 5 10 10M15 5 5 15" /></svg>
+          </button>
         </div>
         <h2 id="unit-name" className="mt-3 text-[22px] leading-tight">{titleCase(u.name)}</h2>
         <p className="mt-1.5 text-muted">

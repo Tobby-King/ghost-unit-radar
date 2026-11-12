@@ -47,28 +47,6 @@ export default function FilterPanel({ idx, summary, filters: f, setFilters, coun
       </div>
 
       <div className="space-y-4 border-b border-line px-4 py-4">
-        <div>
-          <label htmlFor="q" className="label">Find a polling unit, ward or LGA</label>
-          <input id="q" type="search" className="field" placeholder="e.g. Inele, Olamaboro" value={f.q}
-            onChange={(e) => set({ q: e.target.value })} autoComplete="off" />
-          {searching && <p className="mt-1.5 text-[13px] text-muted">Loading unit names…</p>}
-          {results.length > 0 && (
-            <ul className="mt-1" aria-label="Search results">
-              {results.map((r) => (
-                <li key={r.i} className="border-b border-line last:border-0">
-                  <button type="button" onClick={() => onPickResult(r.i)} className="flex w-full items-start gap-2 py-2 text-left hover:text-ink">
-                    <span className="mt-[5px]"><StatusMark band={r.band as Band} /></span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{r.name}</span>
-                      <span className="block truncate text-[12px] text-muted">{r.sub}</span>
-                    </span>
-                    <span className="sr-only">{STATUS[r.band].label}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label htmlFor="state" className="label">State</label>
